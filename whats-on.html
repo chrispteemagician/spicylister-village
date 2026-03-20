@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What's On | The Wombles Village</title>
+    <meta name="description" content="Boot sales, markets, flea markets and fairs near you. Submitted by the Wombles community.">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --dark: #120800;
+            --deep: #1e0e00;
+            --amber: #f59e0b;
+            --amber-light: #fbbf24;
+            --spicy: #ea580c;
+            --spicy-light: #f97316;
+            --cream: #fef3c7;
+            --text: #fed7aa;
+            --text-muted: #a16207;
+            --green: #16a34a;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(180deg, var(--dark) 0%, var(--deep) 50%, var(--dark) 100%);
+            color: var(--text);
+            min-height: 100vh;
+            font-size: 17px;
+            line-height: 1.6;
+        }
+        .container { max-width: 860px; margin: 0 auto; padding: 20px; }
+
+        .page-header {
+            text-align: center;
+            padding: 44px 20px 30px;
+            background: linear-gradient(135deg, #78350f 0%, #431407 100%);
+            border-radius: 0 0 26px 26px;
+            border: 3px solid var(--amber);
+            border-top: none;
+            margin-bottom: 28px;
+        }
+        .page-header h1 {
+            font-family: 'Caveat', cursive;
+            font-size: clamp(2.2rem, 8vw, 3.5rem);
+            color: var(--cream);
+            margin-bottom: 6px;
+        }
+        .page-header p { color: rgba(254,243,199,0.75); }
+
+        .card {
+            background: rgba(255,200,100,0.04);
+            border: 1px solid rgba(255,200,100,0.1);
+            border-radius: 20px;
+            padding: 28px;
+            margin-bottom: 20px;
+        }
+        .card h2 {
+            font-family: 'Caveat', cursive;
+            font-size: 2rem;
+            color: var(--amber);
+            margin-bottom: 16px;
+        }
+        .card-spicy {
+            background: linear-gradient(135deg, rgba(234,88,12,0.1) 0%, rgba(18,8,0,0.95) 100%);
+            border: 2px solid rgba(234,88,12,0.25);
+        }
+        .card-amber {
+            background: linear-gradient(135deg, rgba(245,158,11,0.08) 0%, rgba(18,8,0,0.95) 100%);
+            border: 2px solid rgba(245,158,11,0.2);
+        }
+
+        /* Event type badge */
+        .event-type-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 50px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .badge-boot_sale, .badge-car_boot   { background: rgba(234,88,12,0.2); color: #fb923c; }
+        .badge-market                        { background: rgba(245,158,11,0.2); color: var(--amber-light); }
+        .badge-table_top                     { background: rgba(22,163,74,0.2); color: #4ade80; }
+        .badge-flea_market                   { background: rgba(139,92,246,0.2); color: #c4b5fd; }
+        .badge-antique_fair                  { background: rgba(236,72,153,0.2); color: #f9a8d4; }
+        .badge-other                         { background: rgba(100,116,139,0.2); color: #94a3b8; }
+
+        /* Events list */
+        .events-list { display: flex; flex-direction: column; gap: 14px; }
+        .event-card {
+            background: rgba(255,200,100,0.04);
+            border: 1px solid rgba(255,200,100,0.12);
+            border-radius: 14px;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 80px 1fr;
+            gap: 16px;
+            align-items: start;
+        }
+        .event-date-block {
+            text-align: center;
+            background: linear-gradient(135deg, var(--spicy), #c2410c);
+            border-radius: 12px;
+            padding: 10px 6px;
+            color: white;
+        }
+        .event-date-block .day { font-size: 1.8rem; font-weight: 800; line-height: 1; }
+        .event-date-block .month { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.85; }
+        .event-date-block .dow { font-size: 0.7rem; opacity: 0.7; margin-top: 2px; }
+
+        .event-body .event-title {
+            font-family: 'Caveat', cursive;
+            font-size: 1.5rem;
+            color: var(--amber);
+            margin-bottom: 4px;
+        }
+        .event-body .event-location {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+        .event-body .event-notes {
+            font-size: 0.9rem;
+            color: rgba(254,215,170,0.65);
+            margin-bottom: 8px;
+        }
+        .event-body .event-meta {
+            font-size: 0.8rem;
+            color: rgba(245,158,11,0.45);
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .event-body .event-meta a { color: var(--amber); text-decoration: none; }
+
+        /* Submit form */
+        .form-group { margin-bottom: 18px; }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 7px;
+            color: var(--amber-light);
+            font-size: 0.95rem;
+        }
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 13px 15px;
+            background: rgba(255,200,100,0.06);
+            border: 1px solid rgba(255,200,100,0.2);
+            border-radius: 10px;
+            color: var(--cream);
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus { border-color: var(--amber); }
+        .form-group select option { background: #1e0e00; }
+        .form-group input::placeholder,
+        .form-group textarea::placeholder { color: rgba(254,243,199,0.25); }
+        .form-group .hint { font-size: 0.82rem; color: var(--text-muted); margin-top: 4px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+        .btn-submit {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--spicy), #c2410c);
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            min-height: 54px;
+        }
+        .btn-submit:hover { opacity: 0.88; }
+        .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* Directories grid */
+        .dir-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-top: 4px;
+        }
+        .dir-card {
+            background: rgba(255,200,100,0.04);
+            border: 1px solid rgba(255,200,100,0.12);
+            border-radius: 14px;
+            padding: 20px;
+            text-decoration: none;
+            color: var(--text);
+            display: block;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .dir-card:hover {
+            border-color: var(--amber);
+            background: rgba(245,158,11,0.07);
+        }
+        .dir-card .dir-icon { font-size: 1.8rem; margin-bottom: 8px; }
+        .dir-card .dir-name { font-weight: 700; color: var(--amber-light); margin-bottom: 4px; font-size: 0.95rem; }
+        .dir-card .dir-desc { font-size: 0.85rem; color: var(--text-muted); line-height: 1.4; }
+        .dir-card .dir-link { font-size: 0.8rem; color: rgba(245,158,11,0.5); margin-top: 8px; }
+
+        /* Filter tabs */
+        .filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+        .filter-btn {
+            padding: 7px 16px;
+            border-radius: 50px;
+            border: 2px solid rgba(255,200,100,0.18);
+            background: transparent;
+            color: var(--text-muted);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .filter-btn:hover { border-color: var(--amber); color: var(--amber); }
+        .filter-btn.active { border-color: var(--amber); background: rgba(245,158,11,0.1); color: var(--amber-light); font-weight: 600; }
+
+        .state-msg { text-align: center; padding: 40px 20px; color: var(--text-muted); }
+
+        .hidden { display: none !important; }
+
+        .spicy-bar {
+            background: linear-gradient(90deg, #7c2d12, #9a3412, #7c2d12);
+            text-align: center;
+            padding: 12px 20px;
+            font-size: 15px;
+            color: var(--cream);
+        }
+        .spicy-bar a { color: var(--amber-light); font-weight: 700; text-decoration: none; }
+
+        .success-msg {
+            background: linear-gradient(135deg, rgba(22,163,74,0.12), rgba(18,8,0,0.95));
+            border: 2px solid rgba(22,163,74,0.4);
+            border-radius: 14px;
+            padding: 24px;
+            text-align: center;
+            color: #86efac;
+        }
+
+        @media (max-width: 600px) {
+            .dir-grid { grid-template-columns: 1fr; }
+            .form-row { grid-template-columns: 1fr; }
+            .event-card { grid-template-columns: 1fr; }
+            .event-date-block { display: flex; gap: 10px; align-items: center; border-radius: 10px; padding: 10px 14px; }
+            .event-date-block .day { font-size: 1.4rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="spicy-bar">
+        🌶️ <a href="https://spicylister.com" target="_blank">SpicyLister</a> &middot;
+        <a href="/">&#x1F9FA; Village</a> &middot;
+        <a href="/directory">&#x1F3EA; Stalls</a> &middot;
+        <a href="/signup">&#x1F6D6; Get a Stall</a>
+    </div>
+
+    <div class="page-header">
+        <h1>&#x1F5FA;&#xFE0F; What's On</h1>
+        <p>Boot sales, markets, fairs and flea markets — submitted by Wombles, for Wombles</p>
+    </div>
+
+    <div class="container">
+
+        <!-- COMMUNITY BOARD -->
+        <div class="card">
+            <h2>&#x1F4CC; Community Board</h2>
+            <p style="color:var(--text-muted);margin-bottom:20px;font-size:0.95rem;">
+                Wombles telling other Wombles where the good pitches are. Going to a boot sale? Post it. Help the tribe find you.
+            </p>
+
+            <div class="filter-row" id="filter-row">
+                <button class="filter-btn active" data-type="all">All Events</button>
+                <button class="filter-btn" data-type="boot_sale">&#x1F462; Boot Sales</button>
+                <button class="filter-btn" data-type="car_boot">&#x1F697; Car Boots</button>
+                <button class="filter-btn" data-type="market">&#x1F6CD;&#xFE0F; Markets</button>
+                <button class="filter-btn" data-type="table_top">&#x1F4CB; Table Tops</button>
+                <button class="filter-btn" data-type="flea_market">&#x1F9BA; Flea Markets</button>
+                <button class="filter-btn" data-type="antique_fair">&#x1FA99; Antique Fairs</button>
+            </div>
+
+            <div id="events-container">
+                <div class="state-msg">&#x1F9FA; Loading the board...</div>
+            </div>
+        </div>
+
+        <!-- SUBMIT AN EVENT -->
+        <div class="card card-spicy">
+            <h2>&#x270F;&#xFE0F; Post an Event</h2>
+            <p style="color:var(--text-muted);margin-bottom:22px;font-size:0.95rem;">
+                Going somewhere good? Tell the village. Boot sale, market, table top — anything a Womble would love.
+            </p>
+
+            <div id="submit-success" class="success-msg hidden">
+                <p style="font-size:1.5rem;margin-bottom:8px;">&#x2705;</p>
+                <p style="font-weight:700;margin-bottom:6px;">Event posted!</p>
+                <p style="font-size:0.9rem;opacity:0.8;">It'll appear on the board in a moment. See you there.</p>
+                <button onclick="resetForm()" style="margin-top:14px;background:rgba(22,163,74,0.2);border:1px solid rgba(22,163,74,0.4);color:#86efac;padding:8px 20px;border-radius:8px;cursor:pointer;font-family:'Outfit',sans-serif;font-size:0.9rem;">Post another</button>
+            </div>
+
+            <form id="event-form" autocomplete="off">
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="display_name">Your name *</label>
+                        <input type="text" id="display_name" name="display_name" placeholder="What the village calls you" required maxlength="100">
+                    </div>
+                    <div class="form-group">
+                        <label for="stall_slug">Your stall (optional)</label>
+                        <input type="text" id="stall_slug" name="stall_slug" placeholder="Your eBay username" maxlength="100">
+                        <p class="hint">Links back to your stall page</p>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="event_type">What kind of event? *</label>
+                        <select id="event_type" name="event_type" required>
+                            <option value="" disabled selected>Pick one...</option>
+                            <option value="boot_sale">🥾 Boot Sale</option>
+                            <option value="car_boot">🚗 Car Boot</option>
+                            <option value="market">🛍️ Market</option>
+                            <option value="table_top">📋 Table Top Sale</option>
+                            <option value="flea_market">🧺 Flea Market</option>
+                            <option value="antique_fair">🪙 Antique Fair</option>
+                            <option value="other">📍 Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="event_date">Date *</label>
+                        <input type="date" id="event_date" name="event_date" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="location_name">Where is it? *</label>
+                    <input type="text" id="location_name" name="location_name" placeholder="e.g. Ashton Court, Bristol / Longbridge Deverill Village Hall" required maxlength="200">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="postcode">Postcode</label>
+                        <input type="text" id="postcode" name="postcode" placeholder="BS8 3PX" maxlength="10">
+                        <p class="hint">Helps others find it on a map later</p>
+                    </div>
+                    <div class="form-group" style="display:flex;align-items:flex-end;">
+                        <!-- spacer -->
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="notes">Anything else? (optional)</label>
+                    <textarea id="notes" name="notes" placeholder="Opening time, parking, what you'll be selling, tips for finding a good pitch..." maxlength="500"></textarea>
+                </div>
+
+                <button type="submit" class="btn-submit" id="submit-btn">
+                    <span id="btn-text">&#x1F4CC; Post to the Board</span>
+                    <span id="btn-loading" class="hidden">Posting...</span>
+                </button>
+            </form>
+        </div>
+
+        <!-- CURATED DIRECTORIES -->
+        <div class="card card-amber">
+            <h2>&#x1F50D; Find a Boot Sale</h2>
+            <p style="color:var(--text-muted);margin-bottom:20px;font-size:0.95rem;">
+                The best directories for finding boot sales, markets and fairs across the UK. Old school, reliable, free.
+            </p>
+            <div class="dir-grid">
+                <a href="https://www.carbootjunction.com" target="_blank" rel="noopener" class="dir-card">
+                    <div class="dir-icon">&#x1F697;</div>
+                    <div class="dir-name">Car Boot Junction</div>
+                    <div class="dir-desc">UK-wide car boot sale finder. Search by county or postcode. Regular and one-off sales.</div>
+                    <div class="dir-link">carbootjunction.com &rarr;</div>
+                </a>
+                <a href="https://www.preloved.co.uk/classifieds/all/uk/carboot" target="_blank" rel="noopener" class="dir-card">
+                    <div class="dir-icon">&#x1F9BA;</div>
+                    <div class="dir-name">Preloved Car Boots</div>
+                    <div class="dir-desc">Community-listed boot sales across the UK. Good for finding local one-off events.</div>
+                    <div class="dir-link">preloved.co.uk &rarr;</div>
+                </a>
+                <a href="https://www.visitengland.com/things-to-do/events/markets" target="_blank" rel="noopener" class="dir-card">
+                    <div class="dir-icon">&#x1F6CD;&#xFE0F;</div>
+                    <div class="dir-name">VisitEngland Markets</div>
+                    <div class="dir-desc">Farmers markets, craft fairs, antique markets. Good for the classier end of the Womble spectrum.</div>
+                    <div class="dir-link">visitengland.com &rarr;</div>
+                </a>
+                <a href="https://www.iacf.co.uk/antiques-fairs" target="_blank" rel="noopener" class="dir-card">
+                    <div class="dir-icon">&#x1FA99;</div>
+                    <div class="dir-name">IACF Antique Fairs</div>
+                    <div class="dir-desc">The big antiques fairs — Newark, Shepton Mallet, Stoneleigh. Where serious flippers go hunting.</div>
+                    <div class="dir-link">iacf.co.uk &rarr;</div>
+                </a>
+            </div>
+            <p style="margin-top:16px;font-size:0.85rem;color:rgba(245,158,11,0.4);text-align:center;">
+                Know a better directory? <a href="mailto:chris@chrisptee.co.uk" style="color:var(--amber);">Tell us and we'll add it.</a>
+            </p>
+        </div>
+
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://pdnjeynugptnavkdbmxh.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBkbmpleW51Z3B0bmF2a2RibXhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkwMTEzMDAsImV4cCI6MjA4NDU4NzMwMH0.GawisR01EykMtdauBMxenmHF2NXDMzDOJl8WgzkwFQo';
+        const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        const TYPE_ICONS  = { boot_sale:'&#x1F462;', car_boot:'&#x1F697;', market:'&#x1F6CD;&#xFE0F;', table_top:'&#x1F4CB;', flea_market:'&#x1F9BA;', antique_fair:'&#x1FA99;', other:'&#x1F4CD;' };
+        const TYPE_LABELS = { boot_sale:'Boot Sale', car_boot:'Car Boot', market:'Market', table_top:'Table Top', flea_market:'Flea Market', antique_fair:'Antique Fair', other:'Event' };
+        const DAYS        = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+        const MONTHS      = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+        let allEvents = [];
+        let currentType = 'all';
+
+        // Set min date on form to today
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('event_date').min = today;
+        document.getElementById('event_date').value = today;
+
+        async function loadEvents() {
+            const cutoff = new Date();
+            cutoff.setDate(cutoff.getDate() - 1);
+            const cutoffStr = cutoff.toISOString().split('T')[0];
+
+            const { data, error } = await client
+                .from('womble_events')
+                .select('*')
+                .gte('event_date', cutoffStr)
+                .order('event_date', { ascending: true })
+                .limit(50);
+
+            if (error) {
+                document.getElementById('events-container').innerHTML =
+                    `<div class="state-msg">Couldn&rsquo;t load the board right now. Try refreshing.</div>`;
+                return;
+            }
+
+            allEvents = data || [];
+            renderEvents();
+        }
+
+        function renderEvents() {
+            const filtered = currentType === 'all'
+                ? allEvents
+                : allEvents.filter(e => e.event_type === currentType);
+
+            const container = document.getElementById('events-container');
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="state-msg">
+                    <div style="font-size:2rem;margin-bottom:10px;">&#x1F4CC;</div>
+                    <div>${currentType === 'all' ? 'Nothing on the board yet.' : 'No ' + (TYPE_LABELS[currentType] || 'events') + 's posted yet.'}</div>
+                    <div style="margin-top:8px;font-size:0.9rem;">Be the first &mdash; post one below.</div>
+                </div>`;
+                return;
+            }
+
+            container.innerHTML = `<div class="events-list">${filtered.map(ev => {
+                const d = new Date(ev.event_date + 'T12:00:00');
+                return `<div class="event-card">
+                    <div class="event-date-block">
+                        <div class="dow">${DAYS[d.getDay()]}</div>
+                        <div class="day">${d.getDate()}</div>
+                        <div class="month">${MONTHS[d.getMonth()]}</div>
+                    </div>
+                    <div class="event-body">
+                        <div style="margin-bottom:7px;">
+                            <span class="event-type-badge badge-${ev.event_type}">${TYPE_ICONS[ev.event_type] || ''} ${TYPE_LABELS[ev.event_type] || ev.event_type}</span>
+                        </div>
+                        <div class="event-title">${escHtml(ev.location_name)}</div>
+                        ${ev.postcode ? `<div class="event-location">&#x1F4CD; ${escHtml(ev.postcode)}</div>` : ''}
+                        ${ev.notes ? `<div class="event-notes">${escHtml(ev.notes)}</div>` : ''}
+                        <div class="event-meta">
+                            <span>Posted by ${escHtml(ev.display_name)}</span>
+                            ${ev.stall_slug ? `<a href="/stall/${escHtml(ev.stall_slug)}">&#x1F6D6; View their stall &rarr;</a>` : ''}
+                        </div>
+                    </div>
+                </div>`;
+            }).join('')}</div>`;
+        }
+
+        function escHtml(str) {
+            return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
+        // Filters
+        document.getElementById('filter-row').addEventListener('click', e => {
+            const btn = e.target.closest('.filter-btn');
+            if (!btn) return;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentType = btn.dataset.type;
+            renderEvents();
+        });
+
+        // Submit
+        const form = document.getElementById('event-form');
+        const submitBtn = document.getElementById('submit-btn');
+        const btnText = document.getElementById('btn-text');
+        const btnLoading = document.getElementById('btn-loading');
+
+        form.addEventListener('submit', async e => {
+            e.preventDefault();
+            submitBtn.disabled = true;
+            btnText.classList.add('hidden');
+            btnLoading.classList.remove('hidden');
+
+            const payload = {
+                display_name: document.getElementById('display_name').value.trim(),
+                event_type: document.getElementById('event_type').value,
+                location_name: document.getElementById('location_name').value.trim(),
+                postcode: document.getElementById('postcode').value.trim() || null,
+                event_date: document.getElementById('event_date').value,
+                notes: document.getElementById('notes').value.trim() || null,
+                stall_slug: document.getElementById('stall_slug').value.trim() || null,
+            };
+
+            try {
+                const res = await fetch('/.netlify/functions/womble-event-submit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.error || 'Something went wrong');
+                }
+
+                form.classList.add('hidden');
+                document.getElementById('submit-success').classList.remove('hidden');
+                await loadEvents(); // refresh the board
+
+            } catch (err) {
+                console.error(err);
+                alert(err.message || 'Could not post event. Try again.');
+                submitBtn.disabled = false;
+                btnText.classList.remove('hidden');
+                btnLoading.classList.add('hidden');
+            }
+        });
+
+        function resetForm() {
+            form.reset();
+            document.getElementById('event_date').value = today;
+            form.classList.remove('hidden');
+            document.getElementById('submit-success').classList.add('hidden');
+            submitBtn.disabled = false;
+            btnText.classList.remove('hidden');
+            btnLoading.classList.add('hidden');
+        }
+
+        loadEvents();
+    </script>
+
+</body>
+</html>

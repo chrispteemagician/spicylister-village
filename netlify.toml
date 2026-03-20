@@ -15,3 +15,8 @@
   from = "/signup"
   to = "/signup.html"
   status = 200
+
+[[redirects]]
+  from = "/whats-on"
+  to = "/whats-on.html"
+  status = 200
