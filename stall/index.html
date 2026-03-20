@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wombles Village Stall</title>
+    <meta name="description" content="Wombles Village — Bootsalers, Thrifters, Flippers and Neuro Spicy legends.">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --dark: #120800;
+            --deep: #1e0e00;
+            --amber: #f59e0b;
+            --amber-light: #fbbf24;
+            --spicy: #ea580c;
+            --spicy-light: #f97316;
+            --cream: #fef3c7;
+            --text: #fed7aa;
+            --text-muted: #a16207;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(180deg, var(--dark) 0%, var(--deep) 50%, var(--dark) 100%);
+            color: var(--text);
+            min-height: 100vh;
+            font-size: 18px;
+            line-height: 1.7;
+        }
+        .container { max-width: 820px; margin: 0 auto; padding: 20px; }
+
+        /* Header */
+        .stall-header {
+            background: linear-gradient(135deg, var(--spicy) 0%, #431407 100%);
+            text-align: center;
+            padding: 50px 20px;
+            border-radius: 0 0 30px 30px;
+            border: 4px solid var(--amber);
+            border-top: none;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            margin-bottom: 30px;
+        }
+        .tribe-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, var(--amber), #d97706);
+            color: var(--dark);
+            padding: 8px 22px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 18px;
+        }
+        .stall-header h1 {
+            font-family: 'Caveat', cursive;
+            font-size: clamp(2.8rem, 9vw, 4.5rem);
+            color: var(--cream);
+            margin-bottom: 8px;
+            text-shadow: 0 0 30px rgba(251,191,36,0.3);
+        }
+        .stall-header .ebay-link {
+            color: var(--amber-light);
+            text-decoration: none;
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+        .stall-header .ebay-link:hover { opacity: 1; }
+
+        /* Cards */
+        .card {
+            background: rgba(255,200,100,0.04);
+            border: 1px solid rgba(255,200,100,0.1);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+        .card h2 {
+            font-family: 'Caveat', cursive;
+            font-size: 2rem;
+            color: var(--amber);
+            margin-bottom: 15px;
+        }
+        .card-dark {
+            background: linear-gradient(135deg, #2d1800 0%, #1a0a00 100%);
+            border: 3px solid var(--amber);
+            color: var(--cream);
+            text-align: center;
+        }
+
+        /* eBay listings */
+        .listings-frame {
+            background: rgba(0,0,0,0.2);
+            border-radius: 14px;
+            padding: 16px;
+            overflow: hidden;
+        }
+        .listings-frame img { max-width: 100%; }
+
+        /* QR section */
+        .qr-section { text-align: center; }
+        #qrcode { display: inline-block; padding: 14px; background: #fff; border-radius: 12px; margin-bottom: 14px; }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            text-decoration: none;
+            font-family: 'Outfit', sans-serif;
+            cursor: pointer;
+            border: none;
+            transition: opacity 0.2s;
+            min-height: 52px;
+        }
+        .btn:hover { opacity: 0.88; }
+        .btn-spicy { background: linear-gradient(135deg, var(--spicy), #c2410c); color: white; }
+        .btn-amber { background: linear-gradient(135deg, var(--amber), #d97706); color: var(--dark); }
+        .btn-outline { background: transparent; border: 2px solid var(--amber); color: var(--amber); }
+
+        /* Links */
+        .link-list { list-style: none; display: flex; flex-wrap: wrap; gap: 12px; }
+        .link-list a { color: var(--amber); text-decoration: none; font-size: 0.95rem; }
+        .link-list a:hover { text-decoration: underline; }
+
+        /* Welcome banner */
+        .welcome-banner {
+            background: linear-gradient(135deg, rgba(234,88,12,0.15) 0%, rgba(30,14,0,0.95) 100%);
+            border: 2px solid var(--spicy);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* Not found */
+        .not-found { text-align: center; padding: 80px 20px; }
+        .not-found .big { font-size: 4rem; margin-bottom: 16px; }
+
+        .hidden { display: none !important; }
+
+        .spicy-bar {
+            background: linear-gradient(90deg, #7c2d12, #9a3412, #7c2d12);
+            text-align: center;
+            padding: 12px 20px;
+            font-size: 15px;
+            color: var(--cream);
+        }
+        .spicy-bar a { color: var(--amber-light); font-weight: 700; text-decoration: none; }
+
+        /* PRINT STYLES — QR only */
+        @media print {
+            body { background: white; color: black; }
+            .spicy-bar, .card:not(.print-card), .stall-header { display: none; }
+            .print-card {
+                border: none !important;
+                background: white !important;
+                padding: 0 !important;
+            }
+            .print-hide { display: none !important; }
+            #qrcode { border: 2px solid #000; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="spicy-bar print-hide">
+        🌶️ <a href="https://spicylister.com" target="_blank">SpicyLister</a> — AI eBay listings in seconds &middot; <a href="/">&#x1F9FA; Wombles Village</a>
+    </div>
+
+    <!-- Loading state -->
+    <div id="loading-state" class="container" style="text-align:center;padding:80px 20px;">
+        <div style="font-size:3rem;margin-bottom:14px;">&#x1F9FA;</div>
+        <div style="color:var(--text-muted);">Opening the stall...</div>
+    </div>
+
+    <!-- Not found state -->
+    <div id="not-found-state" class="container hidden">
+        <div class="not-found">
+            <div class="big">&#x1F6D6;</div>
+            <p style="font-family:'Caveat',cursive;font-size:2rem;color:var(--amber);margin-bottom:10px;">Stall not found</p>
+            <p style="color:var(--text-muted);margin-bottom:24px;">That stall doesn&rsquo;t seem to exist yet.</p>
+            <a href="/signup" class="btn btn-spicy">Open Your Stall</a>
+        </div>
+    </div>
+
+    <!-- Stall content (populated by JS) -->
+    <div id="stall-content" class="hidden">
+
+        <!-- New stall welcome banner (shown with ?new=1) -->
+        <div id="welcome-banner" class="container hidden">
+            <div class="welcome-banner">
+                <p style="font-family:'Caveat',cursive;font-size:2.2rem;color:var(--amber-light);margin-bottom:8px;">&#x1F389; Your stall is open!</p>
+                <p id="welcome-name-text" style="margin-bottom:4px;"></p>
+                <p style="color:var(--text-muted);font-size:0.95rem;">Scroll down to find your QR code. Print it. Pin it on your boot stall. The village grows.</p>
+            </div>
+        </div>
+
+        <!-- Header -->
+        <div class="stall-header">
+            <div id="tribe-badge" class="tribe-badge"></div>
+            <h1 id="stall-name"></h1>
+            <p id="stall-ebay-line" style="font-size:1rem;color:rgba(254,243,199,0.65);"></p>
+        </div>
+
+        <div class="container">
+
+            <!-- Live listings -->
+            <div class="card">
+                <h2>&#x1F6D2; Live Listings</h2>
+                <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:16px;">
+                    Live from eBay &middot; Listed with <a href="https://spicylister.com" target="_blank" style="color:var(--amber);">SpicyLister</a>
+                </p>
+                <div class="listings-frame" id="listings-frame">
+                    <div style="color:var(--text-muted);font-size:0.9rem;padding:10px 0;">Loading listings...</div>
+                </div>
+            </div>
+
+            <!-- About -->
+            <div id="bio-card" class="card hidden">
+                <h2>&#x1F3EA; About This Stall</h2>
+                <p id="bio-text" style="margin-bottom:14px;"></p>
+                <p id="location-text" style="color:var(--text-muted);font-size:0.9rem;"></p>
+            </div>
+
+            <!-- Links -->
+            <div id="links-card" class="card hidden">
+                <h2>&#x1F517; Find Me</h2>
+                <ul class="link-list" id="links-list"></ul>
+            </div>
+
+            <!-- QR + Share — the viral engine -->
+            <div class="card card-dark print-card">
+                <h2 style="color:var(--amber-light);font-size:2.2rem;">&#x1F4F1; Share This Stall</h2>
+                <p style="color:rgba(254,243,199,0.75);margin-bottom:20px;">
+                    Print this QR code. Pin it on your boot stall, your market barrow, your van. People scan it. They see what you&rsquo;ve got.
+                </p>
+                <div class="qr-section">
+                    <div id="qrcode"></div>
+                    <p id="stall-url-text" style="font-family:'Caveat',cursive;font-size:1.3rem;color:var(--amber-light);margin-bottom:16px;"></p>
+                    <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center;" class="print-hide">
+                        <button onclick="printQR()" class="btn btn-amber">&#x1F5A8;&#xFE0F; Print QR</button>
+                        <button onclick="copyStallLink()" class="btn btn-outline" id="copy-btn">&#x1F4CB; Copy Link</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Join CTA -->
+            <div class="card print-hide" style="text-align:center;border:2px solid rgba(234,88,12,0.3);background:linear-gradient(135deg,rgba(234,88,12,0.06) 0%,rgba(18,8,0,0.95) 100%);">
+                <h2 style="color:var(--spicy-light);">&#x1F9FA; Want Your Own Stall?</h2>
+                <p style="margin-bottom:20px;color:rgba(254,243,199,0.8);">
+                    Free. List on SpicyLister. Get a stall page. Print your QR. Join the village.
+                </p>
+                <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center;">
+                    <a href="https://spicylister.com" target="_blank" class="btn btn-spicy">&#x1F336;&#xFE0F; List on SpicyLister</a>
+                    <a href="/signup" class="btn btn-outline">&#x1F6D6; Get My Stall</a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://pdnjeynugptnavkdbmxh.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBkbmpleW51Z3B0bmF2a2RibXhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkwMTEzMDAsImV4cCI6MjA4NDU4NzMwMH0.GawisR01EykMtdauBMxenmHF2NXDMzDOJl8WgzkwFQo';
+        const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        const TRIBE_ICONS = { bootsaler: '&#x1F462;', thrifter: '&#x1F9F6;', flipper: '&#x1F504;', neurospicy: '&#x1F9E0;' };
+        const TRIBE_LABELS = { bootsaler: 'Bootsaler', thrifter: 'Thrifter', flipper: 'Flipper', neurospicy: 'Neuro Spicy' };
+
+        // Get slug from URL path: /stall/my-slug
+        const slug = window.location.pathname.replace(/^\/stall\/?/, '').replace(/\/$/, '') || '';
+        const isNew = new URLSearchParams(window.location.search).get('new') === '1';
+        const stallUrl = `${window.location.origin}/stall/${slug}`;
+
+        async function loadStall() {
+            if (!slug) {
+                showNotFound();
+                return;
+            }
+
+            const { data, error } = await client
+                .from('womble_stalls')
+                .select('*')
+                .eq('slug', slug)
+                .eq('approved', true)
+                .single();
+
+            if (error || !data) {
+                showNotFound();
+                return;
+            }
+
+            renderStall(data);
+        }
+
+        function renderStall(stall) {
+            // Update meta
+            document.title = `${stall.display_name}'s Stall | Wombles Village`;
+
+            // Tribe badge
+            document.getElementById('tribe-badge').innerHTML =
+                `${TRIBE_ICONS[stall.tribe] || ''} ${TRIBE_LABELS[stall.tribe] || stall.tribe}`;
+
+            // Header
+            document.getElementById('stall-name').textContent = stall.display_name;
+            document.getElementById('stall-ebay-line').innerHTML =
+                `eBay: <a href="https://www.ebay.co.uk/usr/${encodeURIComponent(stall.ebay_username)}" target="_blank" class="ebay-link" style="color:var(--amber-light);">${escHtml(stall.ebay_username)}</a>`;
+
+            // Auction Nudge live listings
+            const listingsFrame = document.getElementById('listings-frame');
+            listingsFrame.innerHTML = `
+                <div id="auction-nudge-items"></div>
+                <script type="text/javascript" src="//www.auctionnudge.com/feed/item/js/theme/responsive/img_size/120/show_logo/0/SellerID/${encodeURIComponent(stall.ebay_username)}/siteid/3/MaxEntries/12"><\/script>
+                <p style="text-align:right;margin-top:12px;font-size:0.8rem;color:var(--text-muted);">
+                    <a href="https://www.ebay.co.uk/usr/${encodeURIComponent(stall.ebay_username)}" target="_blank" style="color:var(--amber);text-decoration:none;">View all on eBay &rarr;</a>
+                </p>`;
+
+            // Bio card
+            if (stall.bio || stall.location) {
+                document.getElementById('bio-card').classList.remove('hidden');
+                if (stall.bio) document.getElementById('bio-text').textContent = stall.bio;
+                if (stall.location) document.getElementById('location-text').innerHTML = `&#x1F4CD; ${escHtml(stall.location)}`;
+            }
+
+            // Links card
+            const links = [];
+            if (stall.website) links.push(`<li>&#x1F310; <a href="${escHtml(stall.website)}" target="_blank" rel="noopener">${escHtml(stall.website.replace(/^https?:\/\//, ''))}</a></li>`);
+            if (stall.bluesky) links.push(`<li>&#x1F98B; <a href="https://bsky.app/profile/${encodeURIComponent(stall.bluesky.replace('@',''))}" target="_blank" rel="noopener">${escHtml(stall.bluesky)}</a></li>`);
+            if (stall.mastodon) links.push(`<li>&#x1F418; <a href="https://mastodon.social/@${encodeURIComponent(stall.mastodon.replace('@','').split('@')[0])}" target="_blank" rel="noopener">${escHtml(stall.mastodon)}</a></li>`);
+            if (links.length > 0) {
+                document.getElementById('links-card').classList.remove('hidden');
+                document.getElementById('links-list').innerHTML = links.join('');
+            }
+
+            // QR code
+            document.getElementById('stall-url-text').textContent = `spicylister.co.uk/stall/${slug}`;
+            new QRCode(document.getElementById('qrcode'), {
+                text: stallUrl,
+                width: 200,
+                height: 200,
+                colorDark: '#000000',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.M
+            });
+
+            // Welcome banner
+            if (isNew) {
+                document.getElementById('welcome-banner').classList.remove('hidden');
+                document.getElementById('welcome-name-text').innerHTML =
+                    `Welcome to the village, <strong style="color:var(--amber)">${escHtml(stall.display_name)}</strong>. Your stall is open.`;
+            }
+
+            // Show content
+            document.getElementById('loading-state').classList.add('hidden');
+            document.getElementById('stall-content').classList.remove('hidden');
+        }
+
+        function showNotFound() {
+            document.getElementById('loading-state').classList.add('hidden');
+            document.getElementById('not-found-state').classList.remove('hidden');
+        }
+
+        function printQR() {
+            window.print();
+        }
+
+        function copyStallLink() {
+            navigator.clipboard.writeText(stallUrl).then(() => {
+                const btn = document.getElementById('copy-btn');
+                btn.textContent = '&#x2705; Copied!';
+                setTimeout(() => { btn.innerHTML = '&#x1F4CB; Copy Link'; }, 2000);
+            });
+        }
+
+        function escHtml(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        loadStall();
+    </script>
+
+</body>
+</html>

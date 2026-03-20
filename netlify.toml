@@ -1,0 +1,17 @@
+[build]
+  publish = "."
+
+[[redirects]]
+  from = "/stall/*"
+  to = "/stall/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/directory"
+  to = "/directory.html"
+  status = 200
+
+[[redirects]]
+  from = "/signup"
+  to = "/signup.html"
+  status = 200

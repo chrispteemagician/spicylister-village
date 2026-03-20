@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Open Your Stall | The Wombles Village</title>
+    <meta name="description" content="Get your free Wombles Village stall. Show your live eBay listings. Print your QR code for your boot sale.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --dark: #120800;
+            --deep: #1e0e00;
+            --amber: #f59e0b;
+            --amber-light: #fbbf24;
+            --spicy: #ea580c;
+            --spicy-light: #f97316;
+            --cream: #fef3c7;
+            --text: #fed7aa;
+            --text-muted: #a16207;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(180deg, var(--dark) 0%, var(--deep) 50%, var(--dark) 100%);
+            color: var(--text);
+            min-height: 100vh;
+            font-size: 18px;
+            line-height: 1.7;
+        }
+        .container { max-width: 600px; margin: 0 auto; padding: 30px 20px; }
+
+        .page-header {
+            text-align: center;
+            padding: 40px 20px 30px;
+            background: linear-gradient(135deg, var(--spicy) 0%, #431407 100%);
+            border-radius: 0 0 24px 24px;
+            border: 3px solid var(--amber);
+            border-top: none;
+            margin-bottom: 30px;
+        }
+        .page-header h1 {
+            font-family: 'Caveat', cursive;
+            font-size: clamp(2.2rem, 7vw, 3.2rem);
+            color: var(--cream);
+            margin-bottom: 8px;
+        }
+        .page-header p { color: rgba(254,243,199,0.8); font-size: 1rem; }
+
+        .card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,200,100,0.12);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        /* Tribe picker */
+        .tribe-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 6px;
+        }
+        .tribe-option { display: none; }
+        .tribe-label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 18px 12px;
+            border: 2px solid rgba(255,200,100,0.15);
+            border-radius: 14px;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+            text-align: center;
+        }
+        .tribe-label:hover { border-color: rgba(245,158,11,0.5); }
+        .tribe-option:checked + .tribe-label {
+            border-color: var(--amber);
+            background: rgba(245,158,11,0.1);
+        }
+        .tribe-label .t-icon { font-size: 2rem; margin-bottom: 6px; }
+        .tribe-label .t-name { font-weight: 700; color: var(--amber-light); font-size: 0.95rem; }
+        .tribe-label .t-desc { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; line-height: 1.4; }
+
+        /* Form */
+        .form-group { margin-bottom: 20px; }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--amber-light);
+            font-size: 0.95rem;
+        }
+        .form-group .hint { font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; }
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(255,200,100,0.06);
+            border: 1px solid rgba(255,200,100,0.2);
+            border-radius: 10px;
+            color: var(--cream);
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: var(--amber);
+        }
+        .form-group textarea { resize: vertical; min-height: 100px; }
+        .form-group input::placeholder,
+        .form-group textarea::placeholder { color: rgba(254,243,199,0.3); }
+
+        .btn-submit {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, var(--spicy) 0%, #c2410c 100%);
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            min-height: 58px;
+        }
+        .btn-submit:hover { opacity: 0.88; }
+        .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .hidden { display: none !important; }
+
+        .back-link { text-align: center; margin-top: 16px; }
+        .back-link a { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; }
+
+        .spicy-bar {
+            background: linear-gradient(90deg, #7c2d12, #9a3412, #7c2d12);
+            text-align: center;
+            padding: 12px 20px;
+            font-size: 15px;
+            color: var(--cream);
+        }
+        .spicy-bar a { color: var(--amber-light); font-weight: 700; text-decoration: none; }
+    </style>
+</head>
+<body>
+
+    <div class="spicy-bar">
+        🌶️ <a href="https://spicylister.com" target="_blank">SpicyLister</a> — AI eBay listings in seconds &middot; <a href="/">&#x1F9FA; Wombles Village</a>
+    </div>
+
+    <div class="page-header">
+        <h1>&#x1F6D6; Open Your Stall</h1>
+        <p>Free. Your live eBay listings. Your own QR code.</p>
+    </div>
+
+    <div class="container">
+
+        <form id="signup-form">
+
+            <!-- TRIBE -->
+            <div class="card">
+                <div style="margin-bottom:18px;">
+                    <div style="font-family:'Caveat',cursive;font-size:1.8rem;color:var(--amber);margin-bottom:6px;">Which tribe are you?</div>
+                    <div style="color:var(--text-muted);font-size:0.9rem;">Pick the one that fits best. You can be more than one — pick your main energy.</div>
+                </div>
+                <div class="tribe-grid">
+                    <div>
+                        <input type="radio" name="tribe" id="tribe-bootsaler" value="bootsaler" class="tribe-option" required>
+                        <label for="tribe-bootsaler" class="tribe-label">
+                            <span class="t-icon">&#x1F462;</span>
+                            <span class="t-name">Bootsaler</span>
+                            <span class="t-desc">Sunday fields, wet grass, cash in hand</span>
+                        </label>
+                    </div>
+                    <div>
+                        <input type="radio" name="tribe" id="tribe-thrifter" value="thrifter" class="tribe-option">
+                        <label for="tribe-thrifter" class="tribe-label">
+                            <span class="t-icon">&#x1F9F6;</span>
+                            <span class="t-name">Thrifter</span>
+                            <span class="t-desc">Charity shops, jumble sales, patience</span>
+                        </label>
+                    </div>
+                    <div>
+                        <input type="radio" name="tribe" id="tribe-flipper" value="flipper" class="tribe-option">
+                        <label for="tribe-flipper" class="tribe-label">
+                            <span class="t-icon">&#x1F504;</span>
+                            <span class="t-name">Flipper</span>
+                            <span class="t-desc">Margins, comps, buy low sell high</span>
+                        </label>
+                    </div>
+                    <div>
+                        <input type="radio" name="tribe" id="tribe-neurospicy" value="neurospicy" class="tribe-option">
+                        <label for="tribe-neurospicy" class="tribe-label">
+                            <span class="t-icon">&#x1F9E0;</span>
+                            <span class="t-name">Neuro Spicy</span>
+                            <span class="t-desc">Hyperfocus, deep knowledge, the edge</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- YOUR DETAILS -->
+            <div class="card">
+                <div style="font-family:'Caveat',cursive;font-size:1.8rem;color:var(--amber);margin-bottom:20px;">Your stall details</div>
+
+                <div class="form-group">
+                    <label for="display_name">Display Name *</label>
+                    <input type="text" id="display_name" name="display_name" placeholder="What should the village call you?" required maxlength="100">
+                </div>
+
+                <div class="form-group">
+                    <label for="ebay_username">eBay Username *</label>
+                    <input type="text" id="ebay_username" name="ebay_username" placeholder="Your exact eBay username" required maxlength="100">
+                    <p class="hint">This is how your live listings appear on your stall. It becomes your stall URL too.</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="location">Where are you based?</label>
+                    <input type="text" id="location" name="location" placeholder="e.g. Bristol, Yorkshire, South London..." maxlength="100">
+                </div>
+
+                <div class="form-group">
+                    <label for="bio">Tell the village about yourself</label>
+                    <textarea id="bio" name="bio" placeholder="What do you specialise in? How long have you been at it? What's your best ever find?" maxlength="500"></textarea>
+                    <p class="hint">500 characters max. Keep it real — this is your stall sign.</p>
+                </div>
+            </div>
+
+            <!-- OPTIONAL LINKS -->
+            <div class="card">
+                <div style="font-family:'Caveat',cursive;font-size:1.8rem;color:var(--amber);margin-bottom:6px;">Links (optional)</div>
+                <div style="color:var(--text-muted);font-size:0.9rem;margin-bottom:20px;">Bluesky, Mastodon, Upscrolled, your website. No Instagram, TikTok, X or Facebook — the village is an escape from all that.</div>
+
+                <div class="form-group">
+                    <label for="website">Your website or shop</label>
+                    <input type="url" id="website" name="website" placeholder="https://..." maxlength="200">
+                </div>
+                <div class="form-group">
+                    <label for="bluesky">Bluesky handle</label>
+                    <input type="text" id="bluesky" name="bluesky" placeholder="@you.bsky.social" maxlength="100">
+                </div>
+                <div class="form-group">
+                    <label for="mastodon">Mastodon</label>
+                    <input type="text" id="mastodon" name="mastodon" placeholder="@you@instance.social" maxlength="100">
+                </div>
+                <div class="form-group">
+                    <label for="email">Email (not shown publicly — village contact only)</label>
+                    <input type="email" id="email" name="email" placeholder="you@example.com" maxlength="200">
+                </div>
+            </div>
+
+            <!-- SUBMIT -->
+            <button type="submit" class="btn-submit" id="submit-btn">
+                <span id="btn-text">&#x1F6D6; Open My Stall</span>
+                <span id="btn-loading" class="hidden">Building your stall...</span>
+            </button>
+            <p style="text-align:center;font-size:14px;color:rgba(245,158,11,0.4);margin-top:12px;">Free forever. No credit card. No dark patterns.</p>
+        </form>
+
+        <div class="back-link">
+            <a href="/">&larr; Back to the village</a>
+        </div>
+
+    </div>
+
+    <script>
+        const form = document.getElementById('signup-form');
+        const submitBtn = document.getElementById('submit-btn');
+        const btnText = document.getElementById('btn-text');
+        const btnLoading = document.getElementById('btn-loading');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const tribe = form.querySelector('input[name="tribe"]:checked');
+            if (!tribe) {
+                alert('Pick your tribe first — Bootsaler, Thrifter, Flipper, or Neuro Spicy.');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            btnText.classList.add('hidden');
+            btnLoading.classList.remove('hidden');
+
+            const payload = {
+                display_name: document.getElementById('display_name').value.trim(),
+                ebay_username: document.getElementById('ebay_username').value.trim(),
+                tribe: tribe.value,
+                bio: document.getElementById('bio').value.trim() || null,
+                location: document.getElementById('location').value.trim() || null,
+                website: document.getElementById('website').value.trim() || null,
+                bluesky: document.getElementById('bluesky').value.trim() || null,
+                mastodon: document.getElementById('mastodon').value.trim() || null,
+                email: document.getElementById('email').value.trim() || null,
+            };
+
+            try {
+                const res = await fetch('/.netlify/functions/womble-signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await res.json();
+
+                if (res.status === 409) {
+                    // Already exists — redirect to their stall
+                    window.location.href = `/stall/${data.slug}`;
+                    return;
+                }
+
+                if (!res.ok) {
+                    throw new Error(data.error || 'Something went wrong');
+                }
+
+                window.location.href = `/stall/${data.slug}?new=1`;
+
+            } catch (err) {
+                console.error(err);
+                alert('Something went wrong opening your stall. Try again in a moment.');
+                submitBtn.disabled = false;
+                btnText.classList.remove('hidden');
+                btnLoading.classList.add('hidden');
+            }
+        });
+    </script>
+
+</body>
+</html>

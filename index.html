@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Wombles Village | SpicyLister</title>
+    <meta name="description" content="A village for Bootsalers, Thrifters, Flippers and Neuro Spicy legends. Find it. Save it. Flip it. Get your own stall.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --dark: #120800;
+            --deep: #1e0e00;
+            --amber: #f59e0b;
+            --amber-light: #fbbf24;
+            --spicy: #ea580c;
+            --spicy-light: #f97316;
+            --cream: #fef3c7;
+            --text: #fed7aa;
+            --text-muted: #a16207;
+            --forest: #854d0e;
+            --forest-dark: #431407;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(180deg, var(--dark) 0%, var(--deep) 50%, var(--dark) 100%);
+            color: var(--text);
+            min-height: 100vh;
+            font-size: 18px;
+            line-height: 1.7;
+        }
+        .font-hand { font-family: 'Caveat', cursive; }
+        .container { max-width: 820px; margin: 0 auto; padding: 20px; }
+
+        /* Header */
+        .village-header {
+            background: linear-gradient(135deg, var(--spicy) 0%, var(--forest-dark) 100%);
+            text-align: center;
+            padding: 60px 20px;
+            border-radius: 0 0 30px 30px;
+            border: 4px solid var(--amber);
+            border-top: none;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 80px rgba(234,88,12,0.15);
+            margin-bottom: 30px;
+        }
+        .village-header h1 {
+            font-family: 'Caveat', cursive;
+            font-size: clamp(3rem, 10vw, 5rem);
+            color: var(--cream);
+            margin-bottom: 10px;
+            text-shadow: 0 0 40px rgba(251,191,36,0.4);
+        }
+        .village-header .tagline {
+            font-size: 1.3rem;
+            color: rgba(254,243,199,0.85);
+            font-style: italic;
+            margin-bottom: 20px;
+        }
+        .village-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, var(--amber) 0%, #d97706 100%);
+            color: var(--dark);
+            padding: 8px 22px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* Cards */
+        .card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,200,100,0.1);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+        .card h2 {
+            font-family: 'Caveat', cursive;
+            font-size: 2.2rem;
+            margin-bottom: 15px;
+            color: var(--amber);
+        }
+        .card-spicy {
+            background: linear-gradient(135deg, rgba(234,88,12,0.12) 0%, rgba(30,14,0,0.95) 100%);
+            border: 2px solid rgba(234,88,12,0.3);
+        }
+        .card-amber {
+            background: linear-gradient(135deg, rgba(245,158,11,0.1) 0%, rgba(18,8,0,0.95) 100%);
+            border: 2px solid rgba(245,158,11,0.25);
+        }
+        .card-dark {
+            background: linear-gradient(135deg, #2d1800 0%, #1a0a00 100%);
+            border: 3px solid var(--amber);
+            color: var(--cream);
+        }
+
+        /* Tribes grid */
+        .tribes-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 20px;
+        }
+        .tribe-card {
+            background: rgba(255,200,100,0.05);
+            border: 1px solid rgba(255,200,100,0.15);
+            border-radius: 16px;
+            padding: 24px 20px;
+            text-align: center;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .tribe-card:hover {
+            border-color: var(--amber);
+            background: rgba(245,158,11,0.08);
+        }
+        .tribe-card .icon { font-size: 2.4rem; margin-bottom: 10px; }
+        .tribe-card .name { font-weight: 700; font-size: 1.1rem; color: var(--amber-light); margin-bottom: 6px; }
+        .tribe-card .desc { font-size: 0.95rem; color: var(--text-muted); line-height: 1.5; }
+
+        /* How it works */
+        .steps { display: flex; flex-direction: column; gap: 16px; margin-top: 16px; }
+        .step {
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+        }
+        .step-num {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--spicy), #c2410c);
+            color: white;
+            font-weight: 800;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .step-body strong { color: var(--amber-light); display: block; margin-bottom: 2px; }
+        .step-body span { color: var(--text-muted); font-size: 0.95rem; }
+
+        /* CTA Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px 36px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-decoration: none;
+            font-family: 'Outfit', sans-serif;
+            transition: opacity 0.2s;
+            cursor: pointer;
+            border: none;
+            min-height: 56px;
+        }
+        .btn:hover { opacity: 0.88; }
+        .btn-spicy {
+            background: linear-gradient(135deg, var(--spicy) 0%, #c2410c 100%);
+            color: white;
+        }
+        .btn-amber {
+            background: linear-gradient(135deg, var(--amber) 0%, #d97706 100%);
+            color: var(--dark);
+        }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--amber);
+            color: var(--amber);
+        }
+
+        /* Footer */
+        .village-footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+            font-size: 16px;
+            line-height: 2;
+        }
+        .village-footer a { color: var(--amber); text-decoration: none; }
+
+        /* SpicyLister bar */
+        .spicy-bar {
+            background: linear-gradient(90deg, #7c2d12, #9a3412, #7c2d12);
+            text-align: center;
+            padding: 14px 20px;
+            font-size: 16px;
+            color: var(--cream);
+        }
+        .spicy-bar a { color: var(--amber-light); font-weight: 700; text-decoration: none; }
+
+        @media (max-width: 600px) {
+            .tribes-grid { grid-template-columns: 1fr; }
+            .btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SpicyLister bar -->
+    <div class="spicy-bar">
+        🌶️ Powered by <a href="https://spicylister.com" target="_blank">SpicyLister</a> — AI eBay listings in seconds &middot; <a href="https://spicylister.com" target="_blank">List your next find &rarr;</a>
+    </div>
+
+    <!-- HEADER -->
+    <div class="village-header">
+        <div class="village-badge">&#x1F9FA; The Wombles Village</div>
+        <h1>The Wombles</h1>
+        <p class="tagline">Find it. Save it. Flip it.</p>
+        <p style="font-size:1.1rem;color:rgba(254,243,199,0.75);max-width:520px;margin:0 auto;">
+            A village for Bootsalers, Thrifters, Flippers, and the Neuro Spicy legends<br>who know the thrill of turning &pound;3 into &pound;47.
+        </p>
+    </div>
+
+    <div class="container">
+
+        <!-- WHAT IS THIS -->
+        <div class="card card-amber">
+            <h2>&#x1F30D; The Stargate</h2>
+            <p style="margin-bottom:16px;">
+                This is the village for enterprising humans who love to find something, save something, or sell something. Bootsalers with a barrow full of mysteries. Thrifters with charity-shop radar. Flippers who buy with one eye on the margin. Neuro Spicy legends who hyperfocus on one specific thing until they know more about it than anyone alive.
+            </p>
+            <p style="color:var(--text-muted);">
+                Get your own stall. Show the world what you&rsquo;ve got. Print a QR code for your physical stall. The village grows one Womble at a time.
+            </p>
+        </div>
+
+        <!-- FOUR TRIBES -->
+        <div class="card">
+            <h2>&#x1F3EA; The Four Tribes</h2>
+            <div class="tribes-grid">
+                <div class="tribe-card">
+                    <div class="icon">&#x1F462;</div>
+                    <div class="name">Bootsalers</div>
+                    <div class="desc">Sunday mornings. Wet grass. Cash in hand. The eye for a bargain you can&rsquo;t explain but never gets it wrong.</div>
+                </div>
+                <div class="tribe-card">
+                    <div class="icon">&#x1F9F6;</div>
+                    <div class="name">Thrifters</div>
+                    <div class="desc">Charity shops, jumble sales, the back of the shelf. Patient, principled, always finds the good stuff.</div>
+                </div>
+                <div class="tribe-card">
+                    <div class="icon">&#x1F504;</div>
+                    <div class="name">Flippers</div>
+                    <div class="desc">Buy low, sell high. It&rsquo;s a business. You know your margins, your comps, and exactly when to walk away.</div>
+                </div>
+                <div class="tribe-card">
+                    <div class="icon">&#x1F9E0;</div>
+                    <div class="name">Neuro Spicy</div>
+                    <div class="desc">The hyperfocus engine. Once you lock onto something, you know everything about it. That&rsquo;s not a bug. That&rsquo;s the edge.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- HOW IT WORKS -->
+        <div class="card card-spicy">
+            <h2>&#x26A1; How It Works</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-num">1</div>
+                    <div class="step-body">
+                        <strong>List your next find on SpicyLister</strong>
+                        <span>Take a photo. AI writes your eBay listing. Done in under a minute.</span>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-num">2</div>
+                    <div class="step-body">
+                        <strong>Get your Village stall</strong>
+                        <span>Sign up here. Your live eBay listings appear on your stall page automatically.</span>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-num">3</div>
+                    <div class="step-body">
+                        <strong>Print your QR code</strong>
+                        <span>Pin it on your boot stall, your market barrow, your van. People scan it. They see everything you&rsquo;ve got.</span>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-num">4</div>
+                    <div class="step-body">
+                        <strong>The village grows</strong>
+                        <span>Every Womble who joins brings the next one. World domination through kindness. One bargain at a time.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="card card-dark" style="text-align:center;">
+            <h2 style="color:var(--amber-light);font-size:2.5rem;">&#x1F9FA; Get Your Stall</h2>
+            <p style="margin-bottom:24px;color:rgba(254,243,199,0.85);">
+                Free. No pressure. Your own page. Your own QR code. Your live listings.
+            </p>
+            <div style="display:flex;flex-wrap:wrap;gap:14px;justify-content:center;">
+                <a href="/signup" class="btn btn-spicy">&#x1F6D6; Open My Stall</a>
+                <a href="/directory" class="btn btn-outline">&#x1F3EA; Browse the Market</a>
+            </div>
+            <p style="margin-top:20px;font-size:15px;color:rgba(245,158,11,0.55);">
+                Already have a stall? <a href="/directory" style="color:var(--amber);text-decoration:none;">Find it in the directory &rarr;</a>
+            </p>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="village-footer">
+            <p style="font-family:'Caveat',cursive;font-size:1.8rem;color:var(--amber);margin-bottom:10px;">Find it. Save it. Flip it.</p>
+            <p>
+                <a href="https://spicylister.com" target="_blank">&#x1F336;&#xFE0F; SpicyLister</a> &middot;
+                <a href="/directory">&#x1F3EA; Browse Stalls</a> &middot;
+                <a href="/signup">&#x1F6D6; Get a Stall</a>
+            </p>
+            <p style="margin-top:16px;font-size:14px;opacity:0.5;">
+                &ldquo;World domination through kindness. One bargain at a time.&rdquo;
+            </p>
+        </div>
+
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browse the Market | The Wombles Village</title>
+    <meta name="description" content="Browse all Womble stalls — Bootsalers, Thrifters, Flippers and Neuro Spicy legends.">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --dark: #120800;
+            --deep: #1e0e00;
+            --amber: #f59e0b;
+            --amber-light: #fbbf24;
+            --spicy: #ea580c;
+            --cream: #fef3c7;
+            --text: #fed7aa;
+            --text-muted: #a16207;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(180deg, var(--dark) 0%, var(--deep) 50%, var(--dark) 100%);
+            color: var(--text);
+            min-height: 100vh;
+            font-size: 17px;
+            line-height: 1.6;
+        }
+        .container { max-width: 860px; margin: 0 auto; padding: 20px; }
+
+        .page-header {
+            text-align: center;
+            padding: 40px 20px 28px;
+            background: linear-gradient(135deg, var(--spicy) 0%, #431407 100%);
+            border-radius: 0 0 24px 24px;
+            border: 3px solid var(--amber);
+            border-top: none;
+            margin-bottom: 28px;
+        }
+        .page-header h1 {
+            font-family: 'Caveat', cursive;
+            font-size: clamp(2rem, 7vw, 3rem);
+            color: var(--cream);
+            margin-bottom: 6px;
+        }
+        .page-header p { color: rgba(254,243,199,0.75); font-size: 1rem; }
+
+        /* Filter tabs */
+        .filter-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+        .filter-btn {
+            padding: 8px 18px;
+            border-radius: 50px;
+            border: 2px solid rgba(255,200,100,0.2);
+            background: transparent;
+            color: var(--text-muted);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .filter-btn:hover { border-color: var(--amber); color: var(--amber); }
+        .filter-btn.active {
+            border-color: var(--amber);
+            background: rgba(245,158,11,0.12);
+            color: var(--amber-light);
+            font-weight: 600;
+        }
+
+        /* Stall cards grid */
+        .stalls-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .stall-card {
+            background: rgba(255,200,100,0.04);
+            border: 1px solid rgba(255,200,100,0.12);
+            border-radius: 16px;
+            padding: 22px;
+            text-decoration: none;
+            color: var(--text);
+            display: block;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .stall-card:hover {
+            border-color: var(--amber);
+            background: rgba(245,158,11,0.07);
+        }
+        .stall-card .tribe-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 50px;
+            background: rgba(234,88,12,0.2);
+            color: var(--amber-light);
+            margin-bottom: 10px;
+        }
+        .stall-card .stall-name {
+            font-family: 'Caveat', cursive;
+            font-size: 1.6rem;
+            color: var(--amber);
+            margin-bottom: 4px;
+        }
+        .stall-card .stall-location {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+        .stall-card .stall-bio {
+            font-size: 0.9rem;
+            color: rgba(254,215,170,0.7);
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .stall-card .stall-footer {
+            margin-top: 12px;
+            font-size: 0.8rem;
+            color: rgba(245,158,11,0.5);
+        }
+
+        /* Loading / empty states */
+        .state-msg {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+        .state-msg .big { font-size: 3rem; margin-bottom: 14px; }
+
+        .spicy-bar {
+            background: linear-gradient(90deg, #7c2d12, #9a3412, #7c2d12);
+            text-align: center;
+            padding: 12px 20px;
+            font-size: 15px;
+            color: var(--cream);
+        }
+        .spicy-bar a { color: var(--amber-light); font-weight: 700; text-decoration: none; }
+
+        .cta-row { text-align: center; margin: 28px 0; }
+        .btn-spicy {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 32px;
+            background: linear-gradient(135deg, var(--spicy) 0%, #c2410c 100%);
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            border-radius: 12px;
+            text-decoration: none;
+            transition: opacity 0.2s;
+        }
+        .btn-spicy:hover { opacity: 0.88; }
+
+        @media (max-width: 600px) {
+            .stalls-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="spicy-bar">
+        🌶️ <a href="https://spicylister.com" target="_blank">SpicyLister</a> — AI eBay listings in seconds &middot; <a href="/">&#x1F9FA; Wombles Village</a>
+    </div>
+
+    <div class="page-header">
+        <h1>&#x1F3EA; Browse the Market</h1>
+        <p>Every Womble. Every stall. Live eBay listings.</p>
+    </div>
+
+    <div class="container">
+
+        <div class="filter-row" id="filter-row">
+            <button class="filter-btn active" data-tribe="all">All Wombles</button>
+            <button class="filter-btn" data-tribe="bootsaler">&#x1F462; Bootsalers</button>
+            <button class="filter-btn" data-tribe="thrifter">&#x1F9F6; Thrifters</button>
+            <button class="filter-btn" data-tribe="flipper">&#x1F504; Flippers</button>
+            <button class="filter-btn" data-tribe="neurospicy">&#x1F9E0; Neuro Spicy</button>
+        </div>
+
+        <div id="stalls-container">
+            <div class="state-msg">
+                <div class="big">&#x1F9FA;</div>
+                <div>Loading the market...</div>
+            </div>
+        </div>
+
+        <div class="cta-row">
+            <a href="/signup" class="btn-spicy">&#x1F6D6; Open Your Own Stall</a>
+        </div>
+
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://pdnjeynugptnavkdbmxh.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBkbmpleW51Z3B0bmF2a2RibXhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkwMTEzMDAsImV4cCI6MjA4NDU4NzMwMH0.GawisR01EykMtdauBMxenmHF2NXDMzDOJl8WgzkwFQo';
+        const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        const TRIBE_ICONS = {
+            bootsaler: '&#x1F462;',
+            thrifter: '&#x1F9F6;',
+            flipper: '&#x1F504;',
+            neurospicy: '&#x1F9E0;'
+        };
+        const TRIBE_LABELS = {
+            bootsaler: 'Bootsaler',
+            thrifter: 'Thrifter',
+            flipper: 'Flipper',
+            neurospicy: 'Neuro Spicy'
+        };
+
+        let allStalls = [];
+        let currentTribe = 'all';
+
+        async function loadStalls() {
+            const { data, error } = await client
+                .from('womble_stalls')
+                .select('display_name, slug, tribe, bio, location, created_at')
+                .eq('approved', true)
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                document.getElementById('stalls-container').innerHTML = `
+                    <div class="state-msg">
+                        <div class="big">&#x1F9FA;</div>
+                        <div>Couldn&rsquo;t load the market right now. Try refreshing.</div>
+                    </div>`;
+                return;
+            }
+
+            allStalls = data || [];
+            renderStalls();
+        }
+
+        function renderStalls() {
+            const filtered = currentTribe === 'all'
+                ? allStalls
+                : allStalls.filter(s => s.tribe === currentTribe);
+
+            const container = document.getElementById('stalls-container');
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="state-msg">
+                        <div class="big">&#x1F6D6;</div>
+                        <div style="margin-bottom:14px;">${currentTribe === 'all' ? 'The market is just opening.' : 'No ' + TRIBE_LABELS[currentTribe] + 's yet.'}</div>
+                        <div>Be the first — <a href="/signup" style="color:var(--amber);">open your stall</a>.</div>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = `<div class="stalls-grid">${filtered.map(stall => `
+                <a href="/stall/${stall.slug}" class="stall-card">
+                    <div class="tribe-badge">${TRIBE_ICONS[stall.tribe] || ''} ${TRIBE_LABELS[stall.tribe] || stall.tribe}</div>
+                    <div class="stall-name">${escHtml(stall.display_name)}</div>
+                    ${stall.location ? `<div class="stall-location">&#x1F4CD; ${escHtml(stall.location)}</div>` : ''}
+                    ${stall.bio ? `<div class="stall-bio">${escHtml(stall.bio)}</div>` : '<div class="stall-bio" style="opacity:0.4;font-style:italic;">Open stall &rarr;</div>'}
+                    <div class="stall-footer">&#x1F6D2; View live listings &rarr;</div>
+                </a>`).join('')}
+            </div>`;
+        }
+
+        function escHtml(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        // Filter buttons
+        document.getElementById('filter-row').addEventListener('click', (e) => {
+            const btn = e.target.closest('.filter-btn');
+            if (!btn) return;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentTribe = btn.dataset.tribe;
+            renderStalls();
+        });
+
+        loadStalls();
+    </script>
+
+</body>
+</html>
