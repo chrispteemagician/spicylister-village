@@ -20,3 +20,8 @@
   from = "/whats-on"
   to = "/whats-on.html"
   status = 200
+
+[[redirects]]
+  from = "/kid-finder"
+  to = "/kid-finder.html"
+  status = 200

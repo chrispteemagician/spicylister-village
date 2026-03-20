@@ -67,3 +67,6 @@ CREATE POLICY "Anyone can submit an event"
 
 CREATE INDEX IF NOT EXISTS womble_events_date_idx ON womble_events (event_date);
 CREATE INDEX IF NOT EXISTS womble_events_type_idx ON womble_events (event_type);
+
+-- Add w3w_address column (run separately if table already exists)
+ALTER TABLE womble_events ADD COLUMN IF NOT EXISTS w3w_address text;

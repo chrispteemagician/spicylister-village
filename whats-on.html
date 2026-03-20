@@ -21,6 +21,8 @@
             --text: #fed7aa;
             --text-muted: #a16207;
             --green: #16a34a;
+            --w3w: #e11d48;
+            --w3w-light: #fb7185;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -170,6 +172,40 @@
         .form-group input::placeholder,
         .form-group textarea::placeholder { color: rgba(254,243,199,0.25); }
         .form-group .hint { font-size: 0.82rem; color: var(--text-muted); margin-top: 4px; }
+
+        /* W3W field */
+        .w3w-input-wrap { position: relative; }
+        .w3w-prefix {
+            position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
+            color: var(--w3w-light); font-weight: 800; font-size: 1rem;
+            pointer-events: none; letter-spacing: -1px;
+        }
+        .w3w-input {
+            width: 100%; padding: 13px 15px 13px 44px;
+            background: rgba(225,29,72,0.05);
+            border: 1px solid rgba(225,29,72,0.25);
+            border-radius: 10px; color: var(--cream);
+            font-family: 'Outfit', sans-serif; font-size: 1rem; outline: none;
+            transition: border-color 0.2s;
+        }
+        .w3w-input:focus { border-color: var(--w3w); }
+        .w3w-input::placeholder { color: rgba(254,243,199,0.25); }
+        .w3w-suggestions {
+            position: absolute; top: calc(100% + 3px); left: 0; right: 0;
+            background: #1e0e00; border: 1px solid rgba(225,29,72,0.3);
+            border-radius: 10px; z-index: 100; overflow: hidden;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+        }
+        .w3w-suggestion {
+            padding: 10px 14px; cursor: pointer;
+            display: flex; gap: 10px; align-items: center;
+            border-bottom: 1px solid rgba(255,200,100,0.05);
+            transition: background 0.15s;
+        }
+        .w3w-suggestion:last-child { border-bottom: none; }
+        .w3w-suggestion:hover { background: rgba(225,29,72,0.1); }
+        .w3w-suggestion .s-words { font-weight: 600; color: var(--cream); font-size: 0.9rem; }
+        .w3w-suggestion .s-near { font-size: 0.78rem; color: var(--text-muted); }
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 
         .btn-submit {
@@ -268,6 +304,7 @@
         🌶️ <a href="https://spicylister.com" target="_blank">SpicyLister</a> &middot;
         <a href="/">&#x1F9FA; Village</a> &middot;
         <a href="/directory">&#x1F3EA; Stalls</a> &middot;
+        <a href="/kid-finder">&#x1F9D2; Kid Finder</a> &middot;
         <a href="/signup">&#x1F6D6; Get a Stall</a>
     </div>
 
@@ -362,6 +399,16 @@
                     <div class="form-group" style="display:flex;align-items:flex-end;">
                         <!-- spacer -->
                     </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Exact pitch location — What3Words (optional)</label>
+                    <div class="w3w-input-wrap" id="w3w-wrap">
+                        <span class="w3w-prefix">///</span>
+                        <input type="text" id="w3w_address" class="w3w-input" placeholder="type three words to pin your exact spot..." autocomplete="off" spellcheck="false">
+                        <div id="w3w-suggestions" class="w3w-suggestions hidden"></div>
+                    </div>
+                    <p class="hint">Gives people a 3m&sup2; pin for your exact pitch within the field. <a href="https://what3words.com" target="_blank" style="color:var(--w3w-light);">Find your words &rarr;</a></p>
                 </div>
 
                 <div class="form-group">
@@ -488,6 +535,7 @@
                         ${ev.notes ? `<div class="event-notes">${escHtml(ev.notes)}</div>` : ''}
                         <div class="event-meta">
                             <span>Posted by ${escHtml(ev.display_name)}</span>
+                            ${ev.w3w_address ? `<a href="https://what3words.com/${escHtml(ev.w3w_address)}" target="_blank" rel="noopener" style="color:var(--w3w-light);">/// ${escHtml(ev.w3w_address)} &rarr;</a>` : ''}
                             ${ev.stall_slug ? `<a href="/stall/${escHtml(ev.stall_slug)}">&#x1F6D6; View their stall &rarr;</a>` : ''}
                         </div>
                     </div>
@@ -521,6 +569,7 @@
             btnText.classList.add('hidden');
             btnLoading.classList.remove('hidden');
 
+            const w3wRaw = document.getElementById('w3w_address').value.replace(/^\/+/,'').toLowerCase().trim();
             const payload = {
                 display_name: document.getElementById('display_name').value.trim(),
                 event_type: document.getElementById('event_type').value,
@@ -529,6 +578,7 @@
                 event_date: document.getElementById('event_date').value,
                 notes: document.getElementById('notes').value.trim() || null,
                 stall_slug: document.getElementById('stall_slug').value.trim() || null,
+                w3w_address: w3wRaw || null,
             };
 
             try {
@@ -565,6 +615,47 @@
             btnText.classList.remove('hidden');
             btnLoading.classList.add('hidden');
         }
+
+        // W3W autocomplete
+        const W3W_KEY = 'R7VL7Q93';
+        const w3wInput = document.getElementById('w3w_address');
+        const w3wSuggestions = document.getElementById('w3w-suggestions');
+        let w3wTimeout = null;
+
+        w3wInput.addEventListener('input', () => {
+            const val = w3wInput.value.replace(/^\/+/,'').toLowerCase().trim();
+            clearTimeout(w3wTimeout);
+            if (val.length < 3) { w3wSuggestions.classList.add('hidden'); return; }
+            w3wTimeout = setTimeout(async () => {
+                try {
+                    const res = await fetch(`https://api.what3words.com/v3/autosuggest?input=${encodeURIComponent(val)}&key=${W3W_KEY}&language=en&n-results=4&clip-to-country=GB`);
+                    const data = await res.json();
+                    const suggestions = data.suggestions || [];
+                    if (!suggestions.length) { w3wSuggestions.classList.add('hidden'); return; }
+                    w3wSuggestions.innerHTML = suggestions.map(s => `
+                        <div class="w3w-suggestion" data-words="${s.words}">
+                            <span style="color:var(--w3w-light);font-weight:800;font-size:0.85rem;">///</span>
+                            <div>
+                                <div class="s-words">${s.words}</div>
+                                ${s.nearestPlace ? `<div class="s-near">near ${s.nearestPlace}</div>` : ''}
+                            </div>
+                        </div>`).join('');
+                    w3wSuggestions.querySelectorAll('.w3w-suggestion').forEach(el => {
+                        el.addEventListener('click', () => {
+                            w3wInput.value = el.dataset.words;
+                            w3wSuggestions.classList.add('hidden');
+                        });
+                    });
+                    w3wSuggestions.classList.remove('hidden');
+                } catch(e) { console.error('W3W error', e); }
+            }, 280);
+        });
+
+        document.addEventListener('click', e => {
+            if (!document.getElementById('w3w-wrap').contains(e.target)) {
+                w3wSuggestions.classList.add('hidden');
+            }
+        });
 
         loadEvents();
     </script>

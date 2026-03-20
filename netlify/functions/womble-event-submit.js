@@ -17,7 +17,7 @@ exports.handler = async (event) => {
         return { statusCode: 400, body: JSON.stringify({ error: 'Invalid JSON' }) };
     }
 
-    const { display_name, event_type, location_name, postcode, event_date, notes, stall_slug } = body;
+    const { display_name, event_type, location_name, postcode, event_date, notes, stall_slug, w3w_address } = body;
 
     if (!display_name || !event_type || !location_name || !event_date) {
         return { statusCode: 400, body: JSON.stringify({ error: 'Missing required fields' }) };
@@ -44,6 +44,7 @@ exports.handler = async (event) => {
         event_date,
         notes: notes ? notes.trim().slice(0, 500) : null,
         stall_slug: stall_slug ? stall_slug.trim().slice(0, 100) : null,
+        w3w_address: w3w_address ? w3w_address.replace(/^\/+/,'').toLowerCase().trim().slice(0, 100) : null,
     };
 
     try {

@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kid Finder | The Wombles Village</title>
+    <meta name="description" content="Set a meeting point at any boot sale or market using What3Words. Print a pocket card your kids can keep.">
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --dark: #120800;
+            --deep: #1e0e00;
+            --amber: #f59e0b;
+            --amber-light: #fbbf24;
+            --spicy: #ea580c;
+            --cream: #fef3c7;
+            --text: #fed7aa;
+            --text-muted: #a16207;
+            --w3w: #e11d48;
+            --w3w-light: #fb7185;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(180deg, var(--dark) 0%, var(--deep) 50%, var(--dark) 100%);
+            color: var(--text);
+            min-height: 100vh;
+            font-size: 17px;
+            line-height: 1.6;
+        }
+        .container { max-width: 680px; margin: 0 auto; padding: 20px; }
+
+        .page-header {
+            text-align: center;
+            padding: 44px 20px 30px;
+            background: linear-gradient(135deg, #9f1239 0%, #431407 100%);
+            border-radius: 0 0 26px 26px;
+            border: 3px solid var(--amber);
+            border-top: none;
+            margin-bottom: 28px;
+        }
+        .page-header h1 {
+            font-family: 'Caveat', cursive;
+            font-size: clamp(2.2rem, 8vw, 3.5rem);
+            color: var(--cream);
+            margin-bottom: 8px;
+        }
+        .page-header p { color: rgba(254,243,199,0.75); font-size: 1rem; max-width: 480px; margin: 0 auto; }
+
+        .card {
+            background: rgba(255,200,100,0.04);
+            border: 1px solid rgba(255,200,100,0.1);
+            border-radius: 20px;
+            padding: 28px;
+            margin-bottom: 20px;
+        }
+        .card h2 {
+            font-family: 'Caveat', cursive;
+            font-size: 2rem;
+            color: var(--amber);
+            margin-bottom: 16px;
+        }
+
+        /* W3W input */
+        .w3w-input-wrap {
+            position: relative;
+            margin-bottom: 6px;
+        }
+        .w3w-prefix {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--w3w-light);
+            font-weight: 800;
+            font-size: 1.1rem;
+            pointer-events: none;
+            letter-spacing: -1px;
+        }
+        .w3w-input {
+            width: 100%;
+            padding: 15px 16px 15px 46px;
+            background: rgba(225,29,72,0.06);
+            border: 2px solid rgba(225,29,72,0.3);
+            border-radius: 12px;
+            color: var(--cream);
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.05rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .w3w-input:focus { border-color: var(--w3w); }
+        .w3w-input::placeholder { color: rgba(254,243,199,0.25); }
+
+        /* Autocomplete dropdown */
+        .w3w-suggestions {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            right: 0;
+            background: #1e0e00;
+            border: 1px solid rgba(225,29,72,0.3);
+            border-radius: 10px;
+            z-index: 100;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+        }
+        .w3w-suggestion {
+            padding: 12px 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.15s;
+            border-bottom: 1px solid rgba(255,200,100,0.06);
+        }
+        .w3w-suggestion:last-child { border-bottom: none; }
+        .w3w-suggestion:hover { background: rgba(225,29,72,0.1); }
+        .w3w-suggestion .s-words { font-weight: 600; color: var(--cream); font-size: 0.95rem; }
+        .w3w-suggestion .s-near { font-size: 0.8rem; color: var(--text-muted); }
+        .w3w-suggestion .s-icon { color: var(--w3w-light); font-size: 1rem; flex-shrink: 0; }
+        .hidden { display: none !important; }
+
+        /* Hint */
+        .hint { font-size: 0.82rem; color: var(--text-muted); margin-top: 5px; }
+
+        /* Location name input */
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; font-weight: 600; margin-bottom: 7px; color: var(--amber-light); font-size: 0.9rem; }
+        .form-group input {
+            width: 100%;
+            padding: 13px 15px;
+            background: rgba(255,200,100,0.06);
+            border: 1px solid rgba(255,200,100,0.2);
+            border-radius: 10px;
+            color: var(--cream);
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .form-group input:focus { border-color: var(--amber); }
+        .form-group input::placeholder { color: rgba(254,243,199,0.25); }
+
+        .btn-generate {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--w3w), #9f1239);
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            min-height: 54px;
+        }
+        .btn-generate:hover { opacity: 0.88; }
+        .btn-generate:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* Pocket card preview */
+        .pocket-card-wrap {
+            background: white;
+            border-radius: 16px;
+            padding: 4px;
+            margin-bottom: 16px;
+        }
+        .pocket-card {
+            background: white;
+            border-radius: 14px;
+            padding: 24px;
+            color: #1a1a1a;
+            font-family: 'Outfit', sans-serif;
+            text-align: center;
+            border: 3px dashed #e11d48;
+        }
+        .pocket-card .card-title {
+            font-family: 'Caveat', cursive;
+            font-size: 1.6rem;
+            color: #e11d48;
+            margin-bottom: 4px;
+        }
+        .pocket-card .card-subtitle {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 16px;
+        }
+        .pocket-card .card-location {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 12px;
+        }
+        .pocket-card .card-w3w {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #e11d48;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+            word-break: break-all;
+        }
+        .pocket-card .card-w3w-prefix {
+            font-size: 1.1rem;
+            color: #e11d48;
+            opacity: 0.6;
+        }
+        .pocket-card .card-instruction {
+            font-size: 0.82rem;
+            color: #555;
+            margin-top: 12px;
+            line-height: 1.5;
+            border-top: 1px solid #eee;
+            padding-top: 12px;
+        }
+        #card-qr {
+            display: inline-block;
+            margin: 12px auto;
+        }
+        .pocket-card .card-url {
+            font-size: 0.75rem;
+            color: #e11d48;
+            margin-top: 6px;
+        }
+
+        /* Action buttons */
+        .action-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            flex: 1;
+            min-width: 140px;
+            padding: 13px 20px;
+            border-radius: 12px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            border: none;
+            transition: opacity 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn:hover { opacity: 0.88; }
+        .btn-print { background: linear-gradient(135deg, var(--w3w), #9f1239); color: white; }
+        .btn-map { background: linear-gradient(135deg, var(--amber), #d97706); color: var(--dark); }
+        .btn-copy { background: rgba(255,200,100,0.1); border: 2px solid rgba(255,200,100,0.3); color: var(--amber); }
+
+        /* How to use */
+        .steps { display: flex; flex-direction: column; gap: 14px; margin-top: 4px; }
+        .step { display: flex; gap: 14px; align-items: flex-start; }
+        .step-num {
+            width: 36px; height: 36px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--w3w), #9f1239);
+            color: white; font-weight: 800; font-size: 1rem;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .step-body strong { color: var(--w3w-light); display: block; margin-bottom: 2px; }
+        .step-body span { color: var(--text-muted); font-size: 0.9rem; }
+
+        .spicy-bar {
+            background: linear-gradient(90deg, #7c2d12, #9a3412, #7c2d12);
+            text-align: center;
+            padding: 12px 20px;
+            font-size: 15px;
+            color: var(--cream);
+        }
+        .spicy-bar a { color: var(--amber-light); font-weight: 700; text-decoration: none; }
+
+        /* PRINT STYLES */
+        @media print {
+            body { background: white; }
+            .spicy-bar, .card:not(.print-only), .page-header, .action-row { display: none !important; }
+            .print-only { display: block !important; border: none !important; background: none !important; padding: 0 !important; }
+            .pocket-card { border: 3px dashed #e11d48; page-break-inside: avoid; }
+            .container { padding: 0; }
+        }
+        .print-only { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="spicy-bar">
+        🌶️ <a href="https://spicylister.com" target="_blank">SpicyLister</a> &middot;
+        <a href="/">&#x1F9FA; Village</a> &middot;
+        <a href="/whats-on">&#x1F5FA;&#xFE0F; What's On</a> &middot;
+        <a href="/directory">&#x1F3EA; Stalls</a>
+    </div>
+
+    <div class="page-header">
+        <h1>&#x1F9D2; Kid Finder</h1>
+        <p>Set a meeting point before you split up. Print a pocket card your kids can keep. If you get separated — you both know where to go.</p>
+    </div>
+
+    <div class="container">
+
+        <!-- HOW TO USE -->
+        <div class="card">
+            <h2>&#x26A1; How It Works</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-num">1</div>
+                    <div class="step-body">
+                        <strong>Arrive at the boot sale</strong>
+                        <span>Find a landmark — the main gate, the burger van, a big tree. Open this page.</span>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-num">2</div>
+                    <div class="step-body">
+                        <strong>Search your meeting point</strong>
+                        <span>Type the name — What3Words gives you a precise 3-word address for that exact 3m² spot.</span>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-num">3</div>
+                    <div class="step-body">
+                        <strong>Print or screenshot the card</strong>
+                        <span>Kids keep it in their pocket. You both have the same three words. No signal needed once printed.</span>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-num">4</div>
+                    <div class="step-body">
+                        <strong>Go Wombling</strong>
+                        <span>Split up. Fill your bags. The meeting point is sorted.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- GENERATOR -->
+        <div class="card" style="border-color: rgba(225,29,72,0.2);">
+            <h2 style="color:var(--w3w-light);">&#x1F4CD; Set Your Meeting Point</h2>
+
+            <div class="form-group">
+                <label>What3Words address of your meeting point</label>
+                <div class="w3w-input-wrap" id="w3w-wrap">
+                    <span class="w3w-prefix">///</span>
+                    <input
+                        type="text"
+                        id="w3w-input"
+                        class="w3w-input"
+                        placeholder="type three words..."
+                        autocomplete="off"
+                        spellcheck="false"
+                    >
+                    <div id="w3w-suggestions" class="w3w-suggestions hidden"></div>
+                </div>
+                <p class="hint">Start typing — suggestions will appear. Or open the <a href="https://what3words.com" target="_blank" style="color:var(--w3w-light);">What3Words map</a> to find your spot first.</p>
+            </div>
+
+            <div class="form-group">
+                <label for="location-label">Name this meeting spot (optional)</label>
+                <input type="text" id="location-label" placeholder="e.g. Main gate, Near the burger van, Big oak tree..." maxlength="80">
+            </div>
+
+            <div class="form-group">
+                <label for="event-name">Where are you today? (optional)</label>
+                <input type="text" id="event-name" placeholder="e.g. Ashton Court Boot Sale" maxlength="80">
+            </div>
+
+            <button class="btn-generate" id="generate-btn" onclick="generateCard()">
+                &#x1F9D2; Generate Pocket Card
+            </button>
+        </div>
+
+        <!-- CARD PREVIEW (hidden until generated) -->
+        <div class="card hidden" id="card-section" style="border-color:rgba(225,29,72,0.3);">
+            <h2 style="color:var(--w3w-light);">&#x1F5A8;&#xFE0F; Your Pocket Card</h2>
+            <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:16px;">Print this and cut it out. Kids keep one. You keep one.</p>
+
+            <div class="pocket-card-wrap">
+                <div class="pocket-card" id="pocket-card">
+                    <div class="card-title">&#x1F9D2; If we get separated...</div>
+                    <div class="card-subtitle" id="card-event-name"></div>
+                    <div class="card-location" id="card-location-label"></div>
+                    <div class="card-w3w">
+                        <span class="card-w3w-prefix">/// </span><span id="card-words"></span>
+                    </div>
+                    <div id="card-qr"></div>
+                    <div class="card-url" id="card-url-text"></div>
+                    <div class="card-instruction">
+                        Open <strong>what3words.com</strong> or the What3Words app<br>
+                        and type these three words.<br>
+                        Walk to the pin. I&rsquo;ll meet you there. ❤️
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-row">
+                <button class="btn btn-print" onclick="window.print()">&#x1F5A8;&#xFE0F; Print Card</button>
+                <a class="btn btn-map" id="map-link" href="#" target="_blank" rel="noopener">&#x1F30D; View on Map</a>
+                <button class="btn btn-copy" id="copy-btn" onclick="copyW3W()">&#x1F4CB; Copy Address</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Print-only section -->
+    <div class="container print-only" id="print-section"></div>
+
+    <script>
+        const W3W_KEY = 'R7VL7Q93';
+        let selectedAddress = '';
+        let suggestTimeout = null;
+
+        const input = document.getElementById('w3w-input');
+        const suggestionsEl = document.getElementById('w3w-suggestions');
+
+        // Format: strip leading slashes, lowercase
+        function cleanW3W(val) {
+            return val.replace(/^\/+/, '').toLowerCase().trim();
+        }
+
+        function isCompleteW3W(val) {
+            const parts = val.split('.');
+            return parts.length === 3 && parts.every(p => p.length > 0);
+        }
+
+        input.addEventListener('input', () => {
+            const val = cleanW3W(input.value);
+            clearTimeout(suggestTimeout);
+
+            if (val.length < 3) {
+                suggestionsEl.classList.add('hidden');
+                return;
+            }
+
+            suggestTimeout = setTimeout(() => fetchSuggestions(val), 280);
+        });
+
+        input.addEventListener('keydown', e => {
+            if (e.key === 'Escape') suggestionsEl.classList.add('hidden');
+        });
+
+        document.addEventListener('click', e => {
+            if (!document.getElementById('w3w-wrap').contains(e.target)) {
+                suggestionsEl.classList.add('hidden');
+            }
+        });
+
+        async function fetchSuggestions(partial) {
+            try {
+                const url = `https://api.what3words.com/v3/autosuggest?input=${encodeURIComponent(partial)}&key=${W3W_KEY}&language=en&n-results=4&clip-to-country=GB`;
+                const res = await fetch(url);
+                const data = await res.json();
+
+                const suggestions = data.suggestions || [];
+                if (suggestions.length === 0) {
+                    suggestionsEl.classList.add('hidden');
+                    return;
+                }
+
+                suggestionsEl.innerHTML = suggestions.map(s => `
+                    <div class="w3w-suggestion" data-words="${s.words}">
+                        <span class="s-icon">///</span>
+                        <div>
+                            <div class="s-words">${s.words}</div>
+                            ${s.nearestPlace ? `<div class="s-near">near ${s.nearestPlace}</div>` : ''}
+                        </div>
+                    </div>`).join('');
+
+                suggestionsEl.querySelectorAll('.w3w-suggestion').forEach(el => {
+                    el.addEventListener('click', () => {
+                        selectAddress(el.dataset.words);
+                    });
+                });
+
+                suggestionsEl.classList.remove('hidden');
+            } catch (err) {
+                console.error('W3W suggest error:', err);
+            }
+        }
+
+        function selectAddress(words) {
+            selectedAddress = words;
+            input.value = words;
+            suggestionsEl.classList.add('hidden');
+        }
+
+        async function generateCard() {
+            const raw = cleanW3W(input.value);
+
+            if (!isCompleteW3W(raw)) {
+                alert('Please enter or select a complete What3Words address — three words separated by dots.');
+                return;
+            }
+
+            // Validate with W3W API
+            try {
+                const res = await fetch(`https://api.what3words.com/v3/convert-to-coordinates?words=${encodeURIComponent(raw)}&key=${W3W_KEY}`);
+                const data = await res.json();
+
+                if (data.error) {
+                    alert('That doesn\'t look like a valid What3Words address. Try searching again.');
+                    return;
+                }
+
+                selectedAddress = raw;
+                buildCard(raw);
+
+            } catch (err) {
+                // If API fails, still build the card — don't block on network
+                console.error('W3W validation error:', err);
+                selectedAddress = raw;
+                buildCard(raw);
+            }
+        }
+
+        function buildCard(words) {
+            const locationLabel = document.getElementById('location-label').value.trim();
+            const eventName = document.getElementById('event-name').value.trim();
+            const w3wUrl = `https://what3words.com/${words}`;
+
+            // Populate card
+            document.getElementById('card-words').textContent = words;
+            document.getElementById('card-event-name').textContent = eventName || '';
+            document.getElementById('card-location-label').textContent = locationLabel || 'Our meeting point';
+            document.getElementById('card-url-text').textContent = `what3words.com/${words}`;
+            document.getElementById('map-link').href = w3wUrl;
+
+            // QR code — clear first
+            const qrEl = document.getElementById('card-qr');
+            qrEl.innerHTML = '';
+            new QRCode(qrEl, {
+                text: w3wUrl,
+                width: 120,
+                height: 120,
+                colorDark: '#e11d48',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.M
+            });
+
+            document.getElementById('card-section').classList.remove('hidden');
+            document.getElementById('card-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function copyW3W() {
+            const url = `https://what3words.com/${selectedAddress}`;
+            navigator.clipboard.writeText(url).then(() => {
+                const btn = document.getElementById('copy-btn');
+                btn.textContent = '✅ Copied!';
+                setTimeout(() => { btn.innerHTML = '&#x1F4CB; Copy Address'; }, 2000);
+            });
+        }
+    </script>
+
+</body>
+</html>
