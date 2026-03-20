@@ -7,6 +7,7 @@
     <meta name="description" content="Wombles Village — Bootsalers, Thrifters, Flippers and Neuro Spicy legends.">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <script src="/js/patreon.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
@@ -174,7 +175,8 @@
 <body>
 
     <div class="spicy-bar print-hide">
-        🌶️ <a href="https://spicylister.com" target="_blank">SpicyLister</a> &middot; <a href="/">&#x1F9FA; Village</a> &middot; <a href="/directory">&#x1F3EA; Stalls</a> &middot; <a href="/whats-on">&#x1F5FA;&#xFE0F; What's On</a>
+        <span>🌶️ <a href="https://spicylister.com" target="_blank">SpicyLister</a> &middot; <a href="/">&#x1F9FA; Village</a> &middot; <a href="/directory">&#x1F3EA; Stalls</a> &middot; <a href="/whats-on">&#x1F5FA;&#xFE0F; What's On</a></span>
+        <span id="patreon-nav"></span>
     </div>
 
     <!-- Loading state -->
@@ -360,6 +362,18 @@
                     `Welcome to the village, <strong style="color:var(--amber)">${escHtml(stall.display_name)}</strong>. Your stall is open.`;
             }
 
+            // Show Patreon tier badge if session matches (any member gets badge on their own stall)
+            const session = womblePatreon.loadSession();
+            if (session && session.isPro && session.tier) {
+                const badgeEl = document.getElementById('tribe-badge');
+                const colour = womblePatreon.TIER_COLOURS[session.tier] || '#f59e0b';
+                const label = womblePatreon.TIER_LABELS[session.tier] || 'Member';
+                const tierBadge = document.createElement('span');
+                tierBadge.style.cssText = `display:inline-flex;align-items:center;gap:6px;background:${colour};color:#120800;padding:5px 14px;border-radius:50px;font-weight:800;font-size:13px;text-transform:uppercase;letter-spacing:1px;margin-left:8px;`;
+                tierBadge.textContent = label;
+                badgeEl.parentNode.insertBefore(tierBadge, badgeEl.nextSibling);
+            }
+
             // Show content
             document.getElementById('loading-state').classList.add('hidden');
             document.getElementById('stall-content').classList.remove('hidden');
@@ -390,6 +404,7 @@
                 .replace(/"/g, '&quot;');
         }
 
+        womblePatreon.renderNav('patreon-nav');
         loadStall();
     </script>
 

@@ -2,6 +2,11 @@
   publish = "."
 
 [[redirects]]
+  from = "/auth/patreon"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
   from = "/stall/*"
   to = "/stall/index.html"
   status = 200

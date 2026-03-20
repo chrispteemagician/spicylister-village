@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <script src="/js/patreon.js"></script>
     <style>
         :root {
             --dark: #120800;
@@ -206,8 +207,9 @@
 <body>
 
     <!-- SpicyLister bar -->
-    <div class="spicy-bar">
-        🌶️ Powered by <a href="https://spicylister.com" target="_blank">SpicyLister</a> — AI eBay listings in seconds &middot; <a href="https://spicylister.com" target="_blank">List your next find &rarr;</a>
+    <div class="spicy-bar" style="display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:12px;">
+        <span>🌶️ Powered by <a href="https://spicylister.com" target="_blank">SpicyLister</a></span>
+        <span id="patreon-nav"></span>
     </div>
 
     <!-- HEADER -->
@@ -326,6 +328,36 @@
         </div>
 
     </div>
+
+    <script>
+        // Render Patreon nav button
+        womblePatreon.renderNav('patreon-nav');
+
+        // Handle OAuth callback (?code=xxx redirected here via /auth/patreon)
+        (async () => {
+            const params = new URLSearchParams(window.location.search);
+            const code = params.get('code');
+            if (!code) return;
+
+            // Clear code from URL immediately
+            window.history.replaceState({}, '', '/');
+
+            try {
+                const session = await womblePatreon.handleCallback(code);
+                womblePatreon.session = session;
+                womblePatreon.renderNav('patreon-nav');
+
+                // Return to page user was on before sign-in
+                const returnPath = sessionStorage.getItem('patreon_return');
+                sessionStorage.removeItem('patreon_return');
+                if (returnPath && returnPath !== '/' && returnPath !== '/auth/patreon') {
+                    window.location.href = returnPath;
+                }
+            } catch (err) {
+                console.error('Patreon auth failed:', err);
+            }
+        })();
+    </script>
 
 </body>
 </html>

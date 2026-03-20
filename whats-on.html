@@ -6,6 +6,7 @@
     <title>What's On | The Wombles Village</title>
     <meta name="description" content="Boot sales, markets, flea markets and fairs near you. Submitted by the Wombles community.">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/js/patreon.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
@@ -301,11 +302,12 @@
 <body>
 
     <div class="spicy-bar">
-        🌶️ <a href="https://spicylister.com" target="_blank">SpicyLister</a> &middot;
+        <span>🌶️ <a href="https://spicylister.com" target="_blank">SpicyLister</a> &middot;
         <a href="/">&#x1F9FA; Village</a> &middot;
         <a href="/directory">&#x1F3EA; Stalls</a> &middot;
         <a href="/kid-finder">&#x1F9D2; Kid Finder</a> &middot;
-        <a href="/signup">&#x1F6D6; Get a Stall</a>
+        <a href="/signup">&#x1F6D6; Get a Stall</a></span>
+        <span id="patreon-nav"></span>
     </div>
 
     <div class="page-header">
@@ -656,6 +658,29 @@
                 w3wSuggestions.classList.add('hidden');
             }
         });
+
+        // Patreon nav + gate the post form
+        womblePatreon.renderNav('patreon-nav');
+
+        const session = womblePatreon.loadSession();
+        if (!session || !session.isPro) {
+            // Replace form with sign-in prompt
+            document.getElementById('event-form').innerHTML = `
+                <div style="text-align:center;padding:20px 0;">
+                    <p style="font-size:1.1rem;margin-bottom:8px;color:var(--cream);">Posting to the board is for Patreon members.</p>
+                    <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:20px;">It keeps the board clean and the tribe tight.</p>
+                    <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center;">
+                        <button onclick="womblePatreon.signIn()" style="background:linear-gradient(135deg,#ea580c,#c2410c);border:none;color:white;padding:14px 28px;border-radius:12px;font-family:'Outfit',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;">🎨 Sign in with Patreon</button>
+                        <a href="https://www.patreon.com/chrisptee" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;padding:14px 28px;border-radius:12px;border:2px solid rgba(245,158,11,0.3);color:var(--amber);font-weight:600;text-decoration:none;font-size:0.95rem;">Join Patreon &rarr;</a>
+                    </div>
+                </div>`;
+        } else {
+            // Pre-fill name from Patreon session
+            const nameInput = document.getElementById('display_name');
+            if (nameInput && session.fullName && !nameInput.value) {
+                nameInput.value = session.fullName;
+            }
+        }
 
         loadEvents();
     </script>

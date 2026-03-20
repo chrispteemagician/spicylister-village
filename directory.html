@@ -6,6 +6,7 @@
     <title>Browse the Market | The Wombles Village</title>
     <meta name="description" content="Browse all Womble stalls — Bootsalers, Thrifters, Flippers and Neuro Spicy legends.">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/js/patreon.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
@@ -147,6 +148,7 @@
             color: var(--cream);
         }
         .spicy-bar a { color: var(--amber-light); font-weight: 700; text-decoration: none; }
+        .spicy-bar { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 12px; }
 
         .cta-row { text-align: center; margin: 28px 0; }
         .btn-spicy {
@@ -173,7 +175,8 @@
 <body>
 
     <div class="spicy-bar">
-        🌶️ <a href="https://spicylister.com" target="_blank">SpicyLister</a> — AI eBay listings in seconds &middot; <a href="/">&#x1F9FA; Wombles Village</a>
+        <span>🌶️ <a href="https://spicylister.com" target="_blank">SpicyLister</a> &middot; <a href="/">&#x1F9FA; Village</a></span>
+        <span id="patreon-nav"></span>
     </div>
 
     <div class="page-header">
@@ -291,6 +294,7 @@
             renderStalls();
         });
 
+        womblePatreon.renderNav('patreon-nav');
         loadStalls();
     </script>
 

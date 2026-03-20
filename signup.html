@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <script src="/js/patreon.js"></script>
     <style>
         :root {
             --dark: #120800;
@@ -150,8 +151,9 @@
 </head>
 <body>
 
-    <div class="spicy-bar">
-        🌶️ <a href="https://spicylister.com" target="_blank">SpicyLister</a> — AI eBay listings in seconds &middot; <a href="/">&#x1F9FA; Wombles Village</a>
+    <div class="spicy-bar" style="display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:12px;">
+        <span>🌶️ <a href="https://spicylister.com" target="_blank">SpicyLister</a> &middot; <a href="/">&#x1F9FA; Wombles Village</a></span>
+        <span id="patreon-nav"></span>
     </div>
 
     <div class="page-header">
@@ -270,6 +272,15 @@
     </div>
 
     <script>
+        womblePatreon.renderNav('patreon-nav');
+
+        // Pre-fill name from Patreon session
+        const _ps = womblePatreon.loadSession();
+        if (_ps && _ps.fullName) {
+            const n = document.getElementById('display_name');
+            if (n && !n.value) n.value = _ps.fullName;
+        }
+
         const form = document.getElementById('signup-form');
         const submitBtn = document.getElementById('submit-btn');
         const btnText = document.getElementById('btn-text');
