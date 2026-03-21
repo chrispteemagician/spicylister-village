@@ -319,13 +319,17 @@
                 `eBay: <a href="https://www.ebay.co.uk/usr/${encodeURIComponent(stall.ebay_username)}" target="_blank" class="ebay-link" style="color:var(--amber-light);">${escHtml(stall.ebay_username)}</a>`;
 
             // Auction Nudge live listings
+            // NOTE: <script> tags injected via innerHTML do NOT execute — must use createElement
             const listingsFrame = document.getElementById('listings-frame');
             listingsFrame.innerHTML = `
                 <div id="auction-nudge-items"></div>
-                <script type="text/javascript" src="//www.auctionnudge.com/feed/item/js/theme/responsive/img_size/120/show_logo/0/SellerID/${encodeURIComponent(stall.ebay_username)}/siteid/3/MaxEntries/12"><\/script>
                 <p style="text-align:right;margin-top:12px;font-size:0.8rem;color:var(--text-muted);">
                     <a href="https://www.ebay.co.uk/usr/${encodeURIComponent(stall.ebay_username)}" target="_blank" style="color:var(--amber);text-decoration:none;">View all on eBay &rarr;</a>
                 </p>`;
+            const nudgeScript = document.createElement('script');
+            nudgeScript.type = 'text/javascript';
+            nudgeScript.src = `//www.auctionnudge.com/feed/item/js/theme/responsive/img_size/120/show_logo/0/SellerID/${encodeURIComponent(stall.ebay_username)}/siteid/3/MaxEntries/12`;
+            listingsFrame.appendChild(nudgeScript);
 
             // Bio card
             if (stall.bio || stall.location) {
