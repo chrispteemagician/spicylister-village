@@ -104,6 +104,17 @@
         }
         .listings-frame img { max-width: 100%; }
 
+        /* Override AuctionNudge default blue-on-dark styles */
+        .listings-frame a { color: var(--amber) !important; }
+        .listings-frame a:hover { color: var(--amber-light) !important; }
+        .listings-frame, .listings-frame td, .listings-frame div,
+        .listings-frame span, .listings-frame p {
+            color: var(--text) !important;
+            background-color: transparent !important;
+        }
+        .listings-frame table { width: 100%; }
+        #auction-nudge-items a { color: var(--amber) !important; }
+
         /* QR section */
         .qr-section { text-align: center; }
         #qrcode { display: inline-block; padding: 14px; background: #fff; border-radius: 12px; margin-bottom: 14px; }
