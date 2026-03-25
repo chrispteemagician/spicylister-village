@@ -422,7 +422,7 @@
         }
 
         function isCompleteW3W(val) {
-            const parts = val.split('.');
+            const parts = cleanW3W(val).split('.');
             return parts.length === 3 && parts.every(p => p.length > 0);
         }
 
@@ -482,8 +482,9 @@
         }
 
         function selectAddress(words) {
-            selectedAddress = words;
-            input.value = words;
+            const clean = cleanW3W(words);
+            selectedAddress = clean;
+            input.value = clean;
             suggestionsEl.classList.add('hidden');
         }
 
