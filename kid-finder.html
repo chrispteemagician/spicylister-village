@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kid Finder | The Wombles Village</title>
-    <meta name="description" content="Set a meeting point at any boot sale or market using What3Words. Print a pocket card your kids can keep.">
+    <title>Meeting Point Generator | The Wombles Village</title>
+    <meta name="description" content="Set a what3words meeting point at any boot sale or market. Find your kids, your stall, your car. Print a pocket card — no signal needed.">
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -64,21 +64,40 @@
             margin-bottom: 16px;
         }
 
+        /* Use case selector */
+        .use-case-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .use-case-btn {
+            flex: 1;
+            min-width: 120px;
+            padding: 11px 10px;
+            background: rgba(255,200,100,0.05);
+            border: 2px solid rgba(255,200,100,0.15);
+            border-radius: 10px;
+            color: var(--text-muted);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+            text-align: center;
+            line-height: 1.3;
+        }
+        .use-case-btn.active {
+            background: rgba(225,29,72,0.12);
+            border-color: var(--w3w);
+            color: var(--cream);
+        }
+        .use-case-btn:hover { border-color: rgba(225,29,72,0.5); color: var(--cream); }
+
         /* W3W input */
         .w3w-input-wrap {
             position: relative;
             margin-bottom: 6px;
-        }
-        .w3w-prefix {
-            position: absolute;
-            left: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--w3w-light);
-            font-weight: 800;
-            font-size: 1.1rem;
-            pointer-events: none;
-            letter-spacing: -1px;
         }
         .w3w-input {
             width: 100%;
@@ -195,35 +214,46 @@
             color: #1a1a1a;
             margin-bottom: 12px;
         }
+        .pocket-card .card-write-label {
+            font-size: 0.65rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #aaa;
+            margin-bottom: 4px;
+        }
         .pocket-card .card-w3w {
-            font-size: 2rem;
+            font-size: 2.6rem;
             font-weight: 800;
             color: #e11d48;
             letter-spacing: 1px;
-            margin-bottom: 4px;
+            margin-bottom: 6px;
             word-break: break-all;
+            line-height: 1.1;
         }
         .pocket-card .card-w3w-prefix {
-            font-size: 1.1rem;
+            font-size: 1.3rem;
             color: #e11d48;
-            opacity: 0.6;
+            opacity: 0.5;
         }
         .pocket-card .card-instruction {
             font-size: 0.82rem;
             color: #555;
             margin-top: 12px;
-            line-height: 1.5;
+            line-height: 1.6;
             border-top: 1px solid #eee;
             padding-top: 12px;
         }
+        .pocket-card .card-instruction strong { color: #1a1a1a; }
         #card-qr {
             display: inline-block;
-            margin: 12px auto;
+            margin: 10px auto 4px;
         }
         .pocket-card .card-url {
             font-size: 0.75rem;
             color: #e11d48;
-            margin-top: 6px;
+            margin-top: 4px;
+            margin-bottom: 4px;
         }
 
         /* Action buttons */
@@ -296,8 +326,8 @@
     </div>
 
     <div class="page-header">
-        <h1>&#x1F9D2; Kid Finder</h1>
-        <p>Set a meeting point before you split up. Print a pocket card your kids can keep. If you get separated — you both know where to go.</p>
+        <h1>&#x1F4CD; Meeting Point Generator</h1>
+        <p>Find your kids. Find your stall. Find your car. Set a what3words meeting point and print a pocket card — no signal needed once it's in your pocket.</p>
     </div>
 
     <div class="container">
@@ -309,29 +339,29 @@
                 <div class="step">
                     <div class="step-num">1</div>
                     <div class="step-body">
-                        <strong>Arrive at the boot sale</strong>
-                        <span>Find a landmark — the main gate, the burger van, a big tree. Open this page.</span>
+                        <strong>Pick what you're marking</strong>
+                        <span>Kids, stall, car, or a lost &amp; found point. One tool, same three words.</span>
                     </div>
                 </div>
                 <div class="step">
                     <div class="step-num">2</div>
                     <div class="step-body">
-                        <strong>Search your meeting point</strong>
-                        <span>Type the name — What3Words gives you a precise 3-word address for that exact 3m² spot.</span>
+                        <strong>Search your exact spot</strong>
+                        <span>What3Words pinpoints any 3m² on Earth. The burger van, the main gate, your pitch, your bumper.</span>
                     </div>
                 </div>
                 <div class="step">
                     <div class="step-num">3</div>
                     <div class="step-body">
-                        <strong>Print or screenshot the card</strong>
-                        <span>Kids keep it in their pocket. You both have the same three words. No signal needed once printed.</span>
+                        <strong>Write down the three words — or print the card</strong>
+                        <span>Three words fit on a hand, a napkin, a sticky note. No printer? No problem. The words are all you need.</span>
                     </div>
                 </div>
                 <div class="step">
                     <div class="step-num">4</div>
                     <div class="step-body">
                         <strong>Go Wombling</strong>
-                        <span>Split up. Fill your bags. The meeting point is sorted.</span>
+                        <span>Split up. Everyone knows where home base is.</span>
                     </div>
                 </div>
             </div>
@@ -340,6 +370,17 @@
         <!-- GENERATOR -->
         <div class="card" style="border-color: rgba(225,29,72,0.2);">
             <h2 style="color:var(--w3w-light);">&#x1F4CD; Set Your Meeting Point</h2>
+
+            <!-- USE CASE SELECTOR -->
+            <div class="form-group">
+                <label>What are you making a card for?</label>
+                <div class="use-case-row">
+                    <button class="use-case-btn active" data-icon="🧒" data-title="If we get separated..." data-label="Find my kid">🧒 Find my kid</button>
+                    <button class="use-case-btn" data-icon="🏪" data-title="Find my stall" data-label="Find my stall">🏪 Find my stall</button>
+                    <button class="use-case-btn" data-icon="🚗" data-title="Find my car" data-label="Find my car">🚗 Find my car</button>
+                    <button class="use-case-btn" data-icon="📦" data-title="Lost &amp; Found" data-label="Lost &amp; Found point">📦 Lost &amp; Found</button>
+                </div>
+            </div>
 
             <div class="form-group">
                 <label>What3Words address of your meeting point</label>
@@ -358,8 +399,8 @@
             </div>
 
             <div class="form-group">
-                <label for="location-label">Name this meeting spot (optional)</label>
-                <input type="text" id="location-label" placeholder="e.g. Main gate, Near the burger van, Big oak tree..." maxlength="80">
+                <label for="location-label">Name this spot (optional)</label>
+                <input type="text" id="location-label" placeholder="e.g. Main gate, Near the burger van, Pitch 47..." maxlength="80">
             </div>
 
             <div class="form-group">
@@ -368,28 +409,29 @@
             </div>
 
             <button class="btn-generate" id="generate-btn" onclick="generateCard()">
-                &#x1F9D2; Generate Pocket Card
+                &#x1F4CD; Generate Pocket Card
             </button>
         </div>
 
         <!-- CARD PREVIEW (hidden until generated) -->
         <div class="card hidden" id="card-section" style="border-color:rgba(225,29,72,0.3);">
             <h2 style="color:var(--w3w-light);">&#x1F5A8;&#xFE0F; Your Pocket Card</h2>
-            <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:16px;">Print this and cut it out. Kids keep one. You keep one.</p>
+            <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:16px;">Print and cut out. Or just write the three words down — that's all anyone needs.</p>
 
             <div class="pocket-card-wrap">
                 <div class="pocket-card" id="pocket-card">
-                    <div class="card-title">&#x1F9D2; If we get separated...</div>
+                    <div class="card-title" id="card-title">&#x1F9D2; If we get separated...</div>
                     <div class="card-subtitle" id="card-event-name"></div>
                     <div class="card-location" id="card-location-label"></div>
+                    <div class="card-write-label">write these down &darr;</div>
                     <div class="card-w3w">
                         <span class="card-w3w-prefix">/// </span><span id="card-words"></span>
                     </div>
                     <div id="card-qr"></div>
                     <div class="card-url" id="card-url-text"></div>
                     <div class="card-instruction">
-                        Open <strong>what3words.com</strong> or the What3Words app<br>
-                        and type these three words.<br>
+                        <strong>No printer? Write the three words down.</strong><br>
+                        Or scan the QR code to open the map.<br>
                         Walk to the pin. I&rsquo;ll meet you there. ❤️
                     </div>
                 </div>
@@ -411,9 +453,23 @@
         const W3W_KEY = 'R7VL7Q93';
         let selectedAddress = '';
         let suggestTimeout = null;
+        let currentUseCase = { icon: '🧒', title: 'If we get separated...', label: 'Find my kid' };
 
         const input = document.getElementById('w3w-input');
         const suggestionsEl = document.getElementById('w3w-suggestions');
+
+        // Use case selector
+        document.querySelectorAll('.use-case-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.use-case-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentUseCase = {
+                    icon: btn.dataset.icon,
+                    title: btn.dataset.title,
+                    label: btn.dataset.label
+                };
+            });
+        });
 
         // Format: strip leading slashes, lowercase
         function cleanW3W(val) {
@@ -521,10 +577,13 @@
             const eventName = document.getElementById('event-name').value.trim();
             const w3wUrl = `https://what3words.com/${words}`;
 
+            // Use case title
+            document.getElementById('card-title').textContent = `${currentUseCase.icon} ${currentUseCase.title}`;
+
             // Populate card
             document.getElementById('card-words').textContent = words;
             document.getElementById('card-event-name').textContent = eventName || '';
-            document.getElementById('card-location-label').textContent = locationLabel || 'Our meeting point';
+            document.getElementById('card-location-label').textContent = locationLabel || currentUseCase.label;
             document.getElementById('card-url-text').textContent = `what3words.com/${words}`;
             document.getElementById('map-link').href = w3wUrl;
 
