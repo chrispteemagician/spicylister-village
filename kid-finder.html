@@ -543,7 +543,7 @@
             suggestionsEl.classList.add('hidden');
         }
 
-        async function generateCard() {
+        function generateCard() {
             const raw = cleanW3W(input.value);
 
             if (!isCompleteW3W(raw)) {
@@ -551,25 +551,8 @@
                 return;
             }
 
-            // Validate with W3W API
-            try {
-                const res = await fetch(`https://api.what3words.com/v3/convert-to-coordinates?words=${encodeURIComponent(raw)}&key=${W3W_KEY}`);
-                const data = await res.json();
-
-                if (data.error) {
-                    alert('That doesn\'t look like a valid What3Words address. Try searching again.');
-                    return;
-                }
-
-                selectedAddress = raw;
-                buildCard(raw);
-
-            } catch (err) {
-                // If API fails, still build the card — don't block on network
-                console.error('W3W validation error:', err);
-                selectedAddress = raw;
-                buildCard(raw);
-            }
+            selectedAddress = raw;
+            buildCard(raw);
         }
 
         function buildCard(words) {
